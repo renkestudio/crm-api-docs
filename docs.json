@@ -1,0 +1,84 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "maple",
+  "name": "Renke CRM · API",
+  "colors": {
+    "primary": "#FECF01",
+    "light": "#FECF01",
+    "dark": "#FACF0F"
+  },
+  "logo": {
+    "light": "/logo/logo-renke-crm.png",
+    "dark": "/logo/logo-renke-crm-dark.png"
+  },
+  "favicon": "/favicon.png",
+  "appearance": {
+    "default": "system"
+  },
+  "background": {
+    "decoration": "gradient"
+  },
+  "fonts": {
+    "family": "Open Sans"
+  },
+  "navbar": {
+    "primary": {
+      "type": "button",
+      "label": "Abrir o CRM",
+      "href": "https://app.renkecrm.com"
+    }
+  },
+  "api": {
+    "playground": {
+      "display": "interactive"
+    },
+    "examples": {
+      "languages": [
+        "curl",
+        "javascript",
+        "python"
+      ]
+    }
+  },
+  "navigation": {
+    "languages": [
+      {
+        "language": "pt-BR",
+        "default": true,
+        "tabs": [
+          {
+            "tab": "Guias",
+            "groups": [
+              {
+                "group": "Começando",
+                "pages": [
+                  "index",
+                  "autenticacao",
+                  "quickstart"
+                ]
+              },
+              {
+                "group": "Conceitos",
+                "pages": [
+                  "limites-e-erros"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Referência da API",
+            "openapi": "openapi.json"
+          }
+        ]
+      }
+    ]
+  },
+  "footer": {
+    "socials": {
+      "website": "https://renkecrm.com"
+    }
+  },
+  "icons": {
+    "library": "lucide"
+  }
+}

@@ -1,0 +1,77 @@
+/* Renke CRM — ajustes da POC */
+:root { --renke-yellow: #FECF01; --renke-ink: #171717; }
+
+/* Botões Experimentar / Enviar do playground: amarelo com texto escuro (claro e escuro) */
+.tryit-button,
+html.dark .tryit-button,
+button.tryit-button[class*="bg-"] {
+  background-color: var(--renke-yellow) !important;
+  color: var(--renke-ink) !important;
+  border: 1px solid var(--renke-yellow) !important;
+}
+.tryit-button *, html.dark .tryit-button * { color: var(--renke-ink) !important; fill: currentColor; }
+.tryit-button svg { stroke: currentColor; }
+.tryit-button:hover { opacity: 1 !important; filter: brightness(0.94); }
+
+/* Badges de método (GET/POST/PUT/PATCH/DELETE) em pílula arredondada */
+.method-nav-pill > span,
+.method-pill, [class*="method-pill"] > span,
+[class*="method-pill"] {
+  border-radius: 9999px !important;
+}
+.method-nav-pill > span { padding-left: 0.45rem !important; padding-right: 0.45rem !important; }
+
+/* ===== Proposta visual (design-proposta) ===== */
+/* Renke API docs - proposta Leads Sites. Colar em style.css da raiz. */
+:root{--rk:#FECF01;--rk2:#E0B800;--rk-ease:cubic-bezier(.2,.8,.2,1.1)}
+.rk-hero{position:relative;overflow:hidden;border-radius:20px;padding:56px 40px;isolation:isolate;
+ background:linear-gradient(180deg,rgba(254,208,2,.06),transparent)}
+.rk-hero::before{content:"";position:absolute;inset:0;z-index:-1;opacity:.35;
+ background-image:linear-gradient(rgba(127,127,127,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(127,127,127,.12) 1px,transparent 1px);
+ background-size:32px 32px;mask-image:radial-gradient(ellipse at 50% 30%,#000 30%,transparent 75%)}
+.rk-orb{position:absolute;z-index:-2;border-radius:50%;filter:blur(70px);opacity:.45;animation:rk-float 26s ease-in-out infinite}
+.rk-orb.a{width:340px;height:340px;background:var(--rk);top:-120px;left:-80px}
+.rk-orb.b{width:280px;height:280px;background:var(--rk2);bottom:-140px;right:-60px;animation-delay:-9s}
+.rk-orb.c{width:200px;height:200px;background:#fff3a0;top:30%;left:55%;animation-delay:-17s;opacity:.3}
+@keyframes rk-float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(40px,-30px) scale(1.08)}66%{transform:translate(-30px,25px) scale(.95)}}
+.rk-hero h1{font-size:clamp(2rem,4vw,3.2rem);line-height:1.1;margin:0 0 12px}
+.rk-pill{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:999px;font-weight:600;
+ background:var(--rk);color:#171717;transition:transform .2s var(--rk-ease),box-shadow .2s}
+.rk-pill:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(254,208,2,.4)}
+.rk-pill.ghost{background:transparent;color:inherit;border:1px solid rgba(127,127,127,.3)}
+.rk-bento{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}
+.rk-bento .wide{grid-column:span 2}
+@media(max-width:768px){.rk-bento{grid-template-columns:1fr}.rk-bento .wide{grid-column:auto}}
+.rk-card{position:relative;overflow:hidden;border-radius:20px;padding:24px;display:block;text-decoration:none!important;
+ background:rgba(255,255,255,.55);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.6);
+ box-shadow:0 1px 2px rgba(0,0,0,.04);transition:transform .25s var(--rk-ease),border-color .25s,box-shadow .25s;
+ opacity:0;animation:rk-in .6s var(--rk-ease) forwards}
+.dark .rk-card{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.08)}
+.rk-hero-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:32px;align-items:center}
+@media(max-width:900px){.rk-hero-grid{grid-template-columns:1fr}}
+.rk-card:hover{transform:translateY(-2px);border-color:rgba(254,208,2,.6);box-shadow:0 10px 30px rgba(254,208,2,.15)}
+.rk-card::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;
+ background:radial-gradient(260px circle at var(--x,50%) var(--y,50%),rgba(254,208,2,.18),transparent 60%)}
+.rk-card:hover::after{opacity:1}
+.rk-card:nth-child(1){animation-delay:.05s}.rk-card:nth-child(2){animation-delay:.12s}.rk-card:nth-child(3){animation-delay:.19s}
+.rk-card:nth-child(4){animation-delay:.26s}.rk-card:nth-child(5){animation-delay:.33s}
+@keyframes rk-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.rk-card .ico{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:var(--rk);color:#171717;margin-bottom:12px}
+.rk-card h3{margin:0 0 6px;font-size:1.05rem}.rk-card p{margin:0;opacity:.75;font-size:.92rem}
+.rk-stat{font-size:2.4rem;font-weight:800;color:var(--rk2)}
+@media(prefers-reduced-motion:reduce){.rk-orb,.rk-card{animation:none!important;opacity:1}.rk-card,.rk-pill{transition:none}}
+/* Integração: Quickstart e Autenticação lado a lado (2 colunas) */
+.rk-bento{grid-template-columns:repeat(2,1fr)}.rk-bento .wide{grid-column:auto}
+@media(max-width:768px){.rk-bento{grid-template-columns:1fr}}
+/* Revisão UX 20/10 */
+html:not(.dark) .rk-card{background:#FFFFFF;backdrop-filter:none;border:1px solid hsl(40 20% 88%);box-shadow:0 1px 2px rgb(0 0 0 / .04)}
+.rk-bento{grid-template-columns:repeat(2,1fr);grid-auto-rows:1fr}
+.rk-bento .rk-card{grid-column:span 1}
+@media(max-width:768px){.rk-bento{grid-template-columns:1fr}}
+.rk-hero-grid{grid-template-columns:1fr!important;gap:24px}
+.rk-hero-grid > *{min-width:0;width:100%}
+.rk-hero h1{white-space:normal;text-wrap:balance;max-width:none}
+body:has(.rk-hero) #header{display:none}
+
+.rk-intro{margin-top:32px!important}
+@media(max-width:768px){.rk-hero pre,.rk-hero pre code,.rk-hero pre span{font-size:12px!important;white-space:pre!important}}

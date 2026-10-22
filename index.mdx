@@ -1,0 +1,36 @@
+---
+title: "API do Renke CRM"
+mode: "wide"
+description: "Integre seus sistemas ao Renke CRM com uma API REST simples, segura e em JSON."
+---
+
+import HomeHero from "/snippets/home-hero.mdx";
+import HomeBento from "/snippets/home-bento.mdx";
+
+<HomeHero />
+
+<HomeBento />
+
+<p className="rk-intro">A <strong>API pública do Renke CRM</strong> permite ler e gravar os dados da sua conta: contatos, empresas, oportunidades, funis, tarefas, notas, tags, campos personalizados, produtos e webhooks.</p>
+
+
+## URL base
+
+```text
+https://api.renkecrm.com/v1
+```
+
+Todas as requisições usam HTTPS, corpo em JSON (`Content-Type: application/json`) e datas em ISO 8601 (UTC).
+
+## Recursos disponíveis
+
+| Recurso | O que faz |
+| --- | --- |
+| Contatos e Empresas | Cadastro, busca, tags e notas |
+| Oportunidades | Negócios no funil, troca de etapa, produtos, motivos de perda |
+| Pipelines e etapas | Estrutura dos funis de venda |
+| Tarefas | Atividades com prazo, tipos de tarefa e conclusão |
+| Campos personalizados | Propriedades e grupos por entidade |
+| Webhooks | Notificações em tempo real de eventos do CRM |
+
+<Note>Esta é uma prévia (POC). Os endpoints podem mudar.</Note>

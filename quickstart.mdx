@@ -1,0 +1,57 @@
+---
+title: "Quickstart"
+description: "Da chave de API à primeira resposta em poucos minutos."
+---
+
+Neste guia você gera uma chave `rnk_`, descobre o seu `tenant-id` e faz a primeira chamada à API pública do Renke CRM.
+
+<Steps>
+  <Step title="Gere sua chave de API no CRM">
+    No Renke CRM, acesse **Configurações → Integrações → Chaves de API** (disponível para administradores), clique em **Nova chave** e escolha os escopos, por exemplo `contact:read`.
+
+    A chave começa com `rnk_` e é exibida **uma única vez**. Guarde-a em um cofre de segredos.
+
+    <Warning>A tela de chaves ainda está em construção. Enquanto isso, solicite sua chave ao time Renke.</Warning>
+  </Step>
+  <Step title="Encontre o seu tenant-id">
+    O `tenant-id` é o UUID da sua conta e aparece na mesma tela, ao lado da chave. Ele precisa ser o mesmo tenant ao qual a chave pertence.
+
+    ```bash
+    export RENKE_API_KEY="rnk_SUA_CHAVE"
+    export RENKE_TENANT_ID="3f6c1a2e-8b4d-4e2a-9c71-5d0e8a7b4c21"
+    ```
+  </Step>
+  <Step title="Faça a primeira chamada">
+    Liste os seus contatos enviando os dois headers obrigatórios: `Authorization: Bearer rnk_...` e `tenant-id`.
+
+    ```bash
+    curl "https://api.renkecrm.com/v1/contacts?page=1&perPage=20" \
+      -H "Authorization: Bearer $RENKE_API_KEY" \
+      -H "tenant-id: $RENKE_TENANT_ID"
+    ```
+  </Step>
+  <Step title="Leia a resposta">
+    Uma resposta `200 OK` traz a lista paginada de contatos:
+
+    ```json
+    {
+      "rows": [
+        {
+          "id": "e4d3c2b1-a09f-4e8d-b7c6-5a4b3c2d1e0f",
+          "name": "Mariana",
+          "surname": "Albuquerque",
+          "email": "mariana.albuquerque@clinicasorriso.exemplo",
+          "phone": "+5511987654321",
+          "city": "São Paulo",
+          "status": "ACTIVE"
+        }
+      ],
+      "meta": {"hasMore": true, "totalItems": 42, "perPage": 20, "currentPage": 1, "totalPages": 3}
+    }
+    ```
+
+    Se receber `401`, confira o prefixo `Bearer` (case-sensitive) e a chave; `403` indica escopo ausente ou `tenant-id` diferente do tenant da chave. Veja [Limites e erros](/limites-e-erros).
+  </Step>
+</Steps>
+
+<Check>Pronto! Sua integração está autenticada. Explore a aba **Referência da API** para criar contatos, empresas e oportunidades.</Check>

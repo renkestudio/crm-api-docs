@@ -1,0 +1,35 @@
+---
+title: "Limites e erros"
+description: "Rate limit, códigos HTTP e formato das respostas de erro."
+---
+
+## Rate limit
+
+As requisições são limitadas por chave + IP. Ao exceder o limite, a API responde `429 Too Many Requests`.
+
+<Warning>**Em breve:** limites documentados por chave/tenant e headers `X-RateLimit-Limit`, `X-RateLimit-Remaining` e `Retry-After`.</Warning>
+
+Boas práticas: use *backoff* exponencial em 429 e 5xx, e prefira webhooks a *polling*.
+
+## Códigos HTTP
+
+| Código | Significado |
+| --- | --- |
+| `200` / `201` | Sucesso |
+| `400` | Corpo ou parâmetros inválidos |
+| `401` | Chave ausente, inválida ou revogada |
+| `403` | Escopo insuficiente ou `tenant-id` diferente do tenant da chave |
+| `404` | Recurso não encontrado |
+| `409` | Conflito (ex.: registro duplicado) |
+| `429` | Limite de requisições excedido |
+| `5xx` | Erro interno — tente novamente |
+
+## Formato do erro
+
+```json
+{
+  "statusCode": 400,
+  "message": "name: obrigatório",
+  "error": "Bad Request"
+}
+```
