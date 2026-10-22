@@ -1,0 +1,20 @@
+<div className="rk-hero">
+  <span className="rk-orb a" /><span className="rk-orb b" />
+  <div className="rk-hero-grid">
+    <div>
+      <h1>API do Renke CRM</h1>
+      <p>Integre contatos, oportunidades, funis e webhooks ao seu sistema.</p>
+      <div style={{display:'flex',gap:12,marginTop:20,flexWrap:'wrap'}}>
+        <a className="rk-pill" href="/quickstart">Começar em 5 min</a>
+        <a className="rk-pill ghost" href="/api-reference/contatos/listar-contatos">Ver referência</a>
+      </div>
+    </div>
+    <CodeGroup>
+```bash curl
+curl https://api.renkecrm.com/v1/contacts \
+  -H "Authorization: Bearer rnk_exemplo_0000000000000000" \
+  -H "tenant-id: SEU_TENANT"
+```
+    </CodeGroup>
+  </div>
+</div>

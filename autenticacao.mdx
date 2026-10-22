@@ -1,0 +1,32 @@
+---
+title: "Autenticação"
+description: "Toda requisição precisa de dois headers: a chave de API e o ID do tenant."
+---
+
+```bash
+Authorization: Bearer rnk_SUA_CHAVE
+tenant-id: 00000000-0000-0000-0000-000000000000
+```
+
+| Header | Obrigatório | Descrição |
+| --- | --- | --- |
+| `Authorization` | Sim | `Bearer` + chave de API (prefixo `rnk_`). O prefixo `Bearer` é case-sensitive. |
+| `tenant-id` | Sim | UUID da sua conta (tenant). Precisa ser o mesmo tenant da chave. |
+
+## Gerando sua chave de API
+
+<Warning>**Em breve.** A tela de chaves de API dentro do CRM ainda está em construção. Por enquanto, as chaves são emitidas pelo time Renke sob solicitação.</Warning>
+
+<Steps>
+  <Step title="Acesse Configurações → Integrações → Chaves de API">Disponível para usuários administradores.</Step>
+  <Step title="Clique em “Nova chave” e escolha os escopos">Ex.: `contact:read`, `contact:write`, `opportunity:read`.</Step>
+  <Step title="Copie a chave">Ela é exibida **uma única vez**. Guarde em um cofre de segredos.</Step>
+  <Step title="Copie o tenant-id">Fica na mesma tela, ao lado da chave.</Step>
+</Steps>
+
+## Escopos
+
+A chave age em nome do usuário que a criou e só acessa os recursos dos escopos concedidos:
+`contact`, `company`, `opportunity`, `task`, `product`, `tag`, `pipeline`, `pipeline_stage` e `loss_reason`, cada um com `:read` e/ou `:write`.
+
+<Tip>Revogue imediatamente qualquer chave exposta. Nunca coloque a chave em código de front-end público.</Tip>

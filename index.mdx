@@ -1,20 +1,36 @@
 ---
-title: "Introduction"
-description: "Welcome to your project"
+title: "API do Renke CRM"
+mode: "wide"
+description: "Integre seus sistemas ao Renke CRM com uma API REST simples, segura e em JSON."
 ---
 
-Write a short description of your product here. What it does, who it's for, and what they can accomplish with it.
+import HomeHero from "/snippets/home-hero.mdx";
+import HomeBento from "/snippets/home-bento.mdx";
 
-<Tip>
-  Ready to make this your own? Start by editing this page. Update your `docs.json` file to customize your site. Then fill out the [Quickstart](/quickstart) page.
-</Tip>
+<HomeHero />
 
-<Card title="Quickstart" icon="rocket" href="/quickstart">
-  This card links to the quickstart page in your project.
-</Card>
-<Card title="Components" icon="puzzle-piece" href="https://mintlify.com/docs/components">
-  Add cards, callouts, steps, tabs, and more to design and structure your pages.
-</Card>
-<Card title="Settings" icon="gear" href="https://mintlify.com/docs/organize/settings">
-  Set your site name, branding, and navigation in the `docs.json` file.
-</Card>
+<HomeBento />
+
+<p className="rk-intro">A <strong>API pública do Renke CRM</strong> permite ler e gravar os dados da sua conta: contatos, empresas, oportunidades, funis, tarefas, notas, tags, campos personalizados, produtos e webhooks.</p>
+
+
+## URL base
+
+```text
+https://api.renkecrm.com/v1
+```
+
+Todas as requisições usam HTTPS, corpo em JSON (`Content-Type: application/json`) e datas em ISO 8601 (UTC).
+
+## Recursos disponíveis
+
+| Recurso | O que faz |
+| --- | --- |
+| Contatos e Empresas | Cadastro, busca, tags e notas |
+| Oportunidades | Negócios no funil, troca de etapa, produtos, motivos de perda |
+| Pipelines e etapas | Estrutura dos funis de venda |
+| Tarefas | Atividades com prazo, tipos de tarefa e conclusão |
+| Campos personalizados | Propriedades e grupos por entidade |
+| Webhooks | Notificações em tempo real de eventos do CRM |
+
+<Note>Esta é uma prévia (POC). Os endpoints podem mudar.</Note>
