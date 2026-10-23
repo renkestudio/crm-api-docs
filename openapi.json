@@ -8018,8 +8018,8 @@
   ],
   "servers": [
     {
-      "url": "https://api.renkecrm.com/v1",
-      "description": "Produção"
+      "url": "https://api-dev.renkepipeline.com.br/v1",
+      "description": "DEV (demo)"
     }
   ],
   "components": {
