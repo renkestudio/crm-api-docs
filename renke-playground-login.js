@@ -19,7 +19,7 @@
   if (window.__rkPlaygroundLogin) return;
   window.__rkPlaygroundLogin = 1;
 
-  window.RENKE_DOCS_API_BASE = window.RENKE_DOCS_API_BASE || 'https://api-dev.renkepipeline.com.br'; // DEMO DEV
+  window.RENKE_DOCS_API_BASE = window.RENKE_DOCS_API_BASE || (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? location.origin + '/rk-api' : 'https://api-dev.renkepipeline.com.br'); // DEMO DEV
   var DEFAULT_API_BASE = 'https://api.renkecrm.com';
   var API_BASE = String(window.RENKE_DOCS_API_BASE || DEFAULT_API_BASE).replace(/\/+$/, '');
   var STORAGE_KEY = 'rk-docs-playground-key';
