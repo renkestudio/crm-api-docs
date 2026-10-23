@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Demo local da doc (branch demo/docs-login-dev) contra a API do DEV.
-// Uso (na raiz do repo): node demo/run-demo.mjs   -> abre http://localhost:3000
+// Uso (na raiz do repo): node demo/run-demo.mjs  (Windows/macOS/Linux, Node 20-24)   -> abre http://localhost:3000
 // - sobe `mint dev` na porta 3301 (interna)
 // - serve http://localhost:3000: tudo vai pro mint dev, exceto /rk-api/* que é
 //   repassado (lado servidor, sem Origin) para https://api-dev.renkepipeline.com.br.
@@ -9,10 +9,46 @@ import http from 'node:http';
 import https from 'node:https';
 import net from 'node:net';
 import { spawn } from 'node:child_process';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 const PORT = Number(process.env.PORT || 3000), MINT = Number(process.env.MINT_PORT || 3301);
 const API = new URL(process.env.DEMO_API || 'https://api-dev.renkepipeline.com.br');
-const mint = spawn(process.platform === 'win32' ? 'npx.cmd' : 'npx', ['-y', 'mint@latest', 'dev', '--port', String(MINT), '--no-open'], { stdio: 'inherit', shell: process.platform === 'win32' });
-process.on('SIGINT', () => { mint.kill(); process.exit(0); });
+// --- mint: versão FIXA (package.json + package-lock.json), instalada localmente.
+// Nada de `npx mint@latest` (cache do npx no Windows trazia árvore velha -> ERR_UNSUPPORTED_DIR_IMPORT
+// em es-toolkit/compat com Node 24). Roda o index.js do mint com o próprio node (sem shell).
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const WIN = process.platform === 'win32';
+const MINT_ENTRY = path.join(ROOT, 'node_modules', 'mint', 'index.js');
+function run(cmd, args) { // npm/npx: no Windows precisam de shell (são .cmd; Node >= 18.20/20.12 exige)
+  return new Promise((ok) => {
+    const q = (a) => (WIN && /[\s"]/.test(a) ? '"' + a.replace(/"/g, '\\"') + '"' : a);
+    const p = spawn(cmd, WIN ? args.map(q) : args, { cwd: ROOT, stdio: 'inherit', shell: WIN });
+    p.on('exit', (c) => ok(c ?? 1)); p.on('error', () => ok(1));
+  });
+}
+if (!fs.existsSync(MINT_ENTRY)) {
+  console.log('>>> Instalando dependências fixas (npm ci), só na primeira vez...');
+  if (await run('npm', ['ci', '--no-audit', '--no-fund']) !== 0) { console.error('npm ci falhou'); process.exit(1); }
+}
+let mint;
+function startMint(useNode20) {
+  const args = [MINT_ENTRY, 'dev', '--port', String(MINT), '--no-open'];
+  console.log(`>>> mint dev com ${useNode20 ? 'Node 20 (npx -y node@20)' : 'Node ' + process.version}`);
+  const startedAt = Date.now();
+  mint = useNode20
+    ? spawn('npx', ['-y', 'node@20', ...args].map((a) => (WIN && /[\s"]/.test(a) ? '"' + a + '"' : a)), { cwd: ROOT, stdio: 'inherit', shell: WIN })
+    : spawn(process.execPath, args, { cwd: ROOT, stdio: 'inherit' });
+  mint.on('exit', (code) => {
+    if (code && Date.now() - startedAt < 120000 && !useNode20 && Number(process.versions.node.split('.')[0]) >= 23 && process.env.DEMO_NO_NODE20 !== '1') {
+      console.log(`>>> mint caiu (código ${code}) no Node ${process.version}; tentando de novo com Node 20...`);
+      return startMint(true);
+    }
+    if (code) { console.error(`>>> mint encerrou com código ${code}`); process.exit(code); }
+  });
+}
+startMint(process.env.DEMO_FORCE_NODE20 === '1');
+process.on('SIGINT', () => { try { mint.kill(); } catch {} process.exit(0); });
 const srv = http.createServer((req, res) => {
   if (req.url.startsWith('/rk-api/')) {
     const h = { ...req.headers }; delete h.origin; delete h.referer; delete h.cookie; h.host = API.host;

@@ -1,0 +1,8 @@
+{
+  "name": "crm-api-docs-demo",
+  "private": true,
+  "description": "Demo local da doc contra a API do DEV (branch demo/docs-login-dev)",
+  "scripts": { "demo": "node demo/run-demo.mjs" },
+  "devDependencies": { "mint": "4.2.1107" },
+  "engines": { "node": ">=20" }
+}

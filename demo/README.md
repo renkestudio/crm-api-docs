@@ -2,10 +2,19 @@
 
 Branch **demo/docs-login-dev**. Não vai para main e não altera o site público.
 
-## Rodar no PC (1 comando, Node 20+)
+## Rodar no PC (Node 20 a 24; o mint é fixado em 4.2.1107 via package-lock)
+Windows (PowerShell):
+```powershell
+git clone -b demo/docs-login-dev https://github.com/renkestudio/crm-api-docs.git C:\renke-tmp\docs-demo; cd C:\renke-tmp\docs-demo; node demo/run-demo.mjs
+```
+macOS/Linux:
 ```
 git clone -b demo/docs-login-dev https://github.com/renkestudio/crm-api-docs.git && cd crm-api-docs && node demo/run-demo.mjs
 ```
+Na primeira vez, o script roda `npm ci`, que instala o mint fixo em `node_modules`; não usa `npx mint@latest`.
+Se o mint cair no Node >= 23, o script tenta de novo sozinho com `npx -y node@20`.
+Para forçar o Node 20 direto: `$env:DEMO_FORCE_NODE20="1"; node demo/run-demo.mjs`.
+Se já houver um clone antigo (e20803d), rode `git pull` antes.
 Abra http://localhost:3000/api-reference/contatos/listar-contatos. A primeira subida baixa o `mint` e leva de 1 a 2 minutos.
 
 ## Como funciona
