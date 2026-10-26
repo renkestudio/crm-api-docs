@@ -3320,7 +3320,7 @@
             "tenant-id": []
           }
         ],
-        "summary": "Deactivate a task type",
+        "summary": "Desativar um tipo de tarefa",
         "tags": [
           "Tarefas"
         ]
@@ -5544,7 +5544,7 @@
         },
         "summary": "Listar propriedades com paginação e filtros",
         "tags": [
-          "Campos personalizados"
+          "Propriedades"
         ],
         "security": [
           {
@@ -5580,7 +5580,7 @@
         },
         "summary": "Criar propriedade",
         "tags": [
-          "Campos personalizados"
+          "Propriedades"
         ],
         "security": [
           {
@@ -5623,7 +5623,7 @@
         },
         "summary": "Obter propriedade por ID",
         "tags": [
-          "Campos personalizados"
+          "Propriedades"
         ],
         "security": [
           {
@@ -5677,7 +5677,7 @@
         },
         "summary": "Atualizar propriedade",
         "tags": [
-          "Campos personalizados"
+          "Propriedades"
         ],
         "security": [
           {
@@ -5711,7 +5711,7 @@
         },
         "summary": "Excluir propriedade",
         "tags": [
-          "Campos personalizados"
+          "Propriedades"
         ],
         "security": [
           {
@@ -5787,7 +5787,7 @@
         },
         "summary": "Listar valores de uma propriedade",
         "tags": [
-          "Campos personalizados"
+          "Propriedades"
         ],
         "security": [
           {
@@ -5840,7 +5840,7 @@
         },
         "summary": "Listar propriedades de um tipo de entidade",
         "tags": [
-          "Campos personalizados"
+          "Propriedades"
         ],
         "security": [
           {
@@ -5904,7 +5904,7 @@
         },
         "summary": "Listar propriedades agrupadas, com valores, de uma entidade",
         "tags": [
-          "Campos personalizados"
+          "Propriedades"
         ],
         "security": [
           {
@@ -5945,7 +5945,7 @@
         },
         "summary": "Criar grupo de propriedades",
         "tags": [
-          "Campos personalizados"
+          "Propriedades"
         ],
         "security": [
           {
@@ -6102,7 +6102,7 @@
         },
         "summary": "Listar grupos de propriedades de um tipo de entidade",
         "tags": [
-          "Campos personalizados"
+          "Propriedades"
         ],
         "security": [
           {
@@ -6145,7 +6145,7 @@
         },
         "summary": "Obter grupo de propriedades por ID",
         "tags": [
-          "Campos personalizados"
+          "Propriedades"
         ],
         "security": [
           {
@@ -6199,7 +6199,7 @@
         },
         "summary": "Atualizar grupo de propriedades",
         "tags": [
-          "Campos personalizados"
+          "Propriedades"
         ],
         "security": [
           {
@@ -6243,7 +6243,7 @@
         },
         "summary": "Excluir grupo de propriedades",
         "tags": [
-          "Campos personalizados"
+          "Propriedades"
         ],
         "security": [
           {
@@ -8001,7 +8001,7 @@
       "name": "Tags"
     },
     {
-      "name": "Campos personalizados"
+      "name": "Propriedades"
     },
     {
       "name": "Produtos"
