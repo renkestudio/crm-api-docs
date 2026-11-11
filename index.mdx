@@ -11,7 +11,7 @@ import HomeBento from "/snippets/home-bento.mdx";
 
 <HomeBento />
 
-<p className="rk-intro">A <strong>API pública do Renke CRM</strong> permite ler e gravar os dados da sua conta: contatos, empresas, oportunidades, funis, tarefas, notas, tags, campos personalizados, produtos e webhooks.</p>
+<p className="rk-intro">A <strong>API pública do Renke CRM</strong> permite ler e gravar os dados da sua conta: contatos, empresas, oportunidades, funis, tarefas, agenda, formulários, notas, tags, campos personalizados, produtos e webhooks.</p>
 
 
 ## URL base
@@ -22,6 +22,8 @@ https://api.renkecrm.com/v1
 
 Todas as requisições usam HTTPS, corpo em JSON (`Content-Type: application/json`) e datas em ISO 8601 (UTC).
 
+<Warning>**Mudança:** A partir de [data do deploy], a chave de API (`rnk_`) só é aceita em `https://api.renkecrm.com/v1/...`. Chamadas com a chave em endereços sem `/v1` (por exemplo, `https://api.renkecrm.com/opportunities`) recebem 401. Para corrigir, acrescente `/v1` ao caminho; o resto da chamada não muda.</Warning>
+
 ## Recursos disponíveis
 
 | Recurso | O que faz |
@@ -30,7 +32,11 @@ Todas as requisições usam HTTPS, corpo em JSON (`Content-Type: application/jso
 | Oportunidades | Negócios no funil, troca de etapa, produtos, motivos de perda |
 | Pipelines e etapas | Estrutura dos funis de venda |
 | Tarefas | Atividades com prazo, tipos de tarefa e conclusão |
+| Agenda | Agendamentos, horários livres, calendários, equipe e lista de espera |
+| Formulários | Formulários, links para oportunidades, indicadores e envios |
 | Propriedades | Propriedades e grupos por entidade |
 | Webhooks | Notificações em tempo real de eventos do CRM |
+
+Ao todo, são **170 endpoints** na [Referência da API](/api-reference/contatos/listar-contatos). A Agenda só responde nos tenants em que o módulo Agenda está ligado.
 
 <Note>Esta é uma prévia (POC). Os endpoints podem mudar.</Note>

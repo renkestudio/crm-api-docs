@@ -13,6 +13,8 @@ tenant-id: 00000000-0000-0000-0000-000000000000
 | `Authorization` | Sim | `Bearer` + chave de API (prefixo `rnk_`). O prefixo `Bearer` é case-sensitive. |
 | `tenant-id` | Sim | UUID da sua conta (tenant). Precisa ser o mesmo tenant da chave. |
 
+<Warning>A chave de API (`rnk_`) só vale na API pública, em `https://api.renkecrm.com/v1/...`. Em endereços sem `/v1`, a chamada com a chave recebe `401` com a mensagem `Chave de API só é aceita na API pública /v1`.</Warning>
+
 ## Gerando sua chave de API
 
 <Warning>**Em breve.** A tela de chaves de API dentro do CRM ainda está em construção. Por enquanto, as chaves são emitidas pelo time Renke sob solicitação.</Warning>
@@ -26,7 +28,45 @@ tenant-id: 00000000-0000-0000-0000-000000000000
 
 ## Escopos
 
-A chave age em nome do usuário que a criou e só acessa os recursos dos escopos concedidos:
-`contact`, `company`, `opportunity`, `task`, `product`, `tag`, `pipeline`, `pipeline_stage` e `loss_reason`, cada um com `:read` e/ou `:write`.
+A chave age em nome do usuário que a criou e só acessa os recursos dos escopos concedidos. Cada escopo vem em `:read` (leitura) e/ou `:write` (escrita); a escrita já inclui a leitura.
+
+| Escopo | No CRM | O que abre |
+| --- | --- | --- |
+| `contact:read` / `contact:write` | Contatos | Contatos, com tags e notas |
+| `company:read` / `company:write` | Empresas | Empresas, com tags e notas |
+| `opportunity:read` / `opportunity:write` | Oportunidades | Oportunidades, troca de etapa, produtos e motivos de perda da oportunidade |
+| `task:read` / `task:write` | Tarefas | Tarefas e tipos de tarefa |
+| `product:read` / `product:write` | Produtos | Produtos e categorias |
+| `tag:read` / `tag:write` | Tags | Tags |
+| `pipeline:read` / `pipeline:write` | Pipelines | Funis de venda |
+| `pipeline_stage:read` / `pipeline_stage:write` | Etapas | Etapas dos funis |
+| `loss_reason:read` / `loss_reason:write` | Motivos de perda | Motivos e grupos de motivos de perda |
+| `property:read` / `property:write` | Propriedades | Propriedades e grupos por entidade. Não abre Formulários. |
+| `tenant_user:read` | Usuários | Usuários da conta. Só leitura. |
+| `appointment:read` | Agendamentos: leitura | Ver agendamentos, horários livres, calendários, equipe e lista de espera. |
+| `appointment:write` | Agendamentos: escrita | Criar, reagendar e cancelar agendamentos, marcar presença, confirmação e sinal, e mexer na lista de espera. Pode disparar os avisos ao paciente que estiverem ligados no calendário. |
+| `calendar_config:read` | Configuração da agenda: leitura | Ver configurações da agenda, unidades, recursos, regras de horário e serviços. Só leitura. |
+| `web_form:read` | Formulários: leitura | Ver formulários, indicadores e envios, incluindo os dados de contato preenchidos. `web_form:read` dá acesso aos envios dos formulários, incluindo os dados de contato que a pessoa preencheu (nome, telefone, e-mail e os demais campos). Esse acesso não depende de `contact:read`. Conceda esse escopo só a integrações que podem tratar esses dados pessoais. |
+| `web_form:write` | Formulários: escrita | Criar, editar e excluir formulários. Gerar link para oportunidade exige também Oportunidades: escrita. |
+| `system_webhook:read` / `system_webhook:write` | Webhooks globais | Ver e gerenciar webhooks globais, que enviam os eventos do CRM para uma URL sua. |
+
+São 28 escopos ao todo. `tenant_user:write` e `calendar_config:write` não existem: a criação da chave com eles responde `400`.
+
+### Agenda
+
+- A Agenda só responde nos tenants em que o módulo Agenda está ligado.
+- Criar, reagendar e cancelar um agendamento, e marcar falta, pode disparar o aviso ao paciente, se essa notificação estiver ligada no calendário. É o mesmo efeito de fazer a ação na tela do CRM.
+- A escrita de configuração da agenda (calendários, unidades, recursos, horários e serviços) não faz parte da API pública.
+
+### Formulários
+
+<Warning>`web_form:read` dá acesso aos envios dos formulários, incluindo os dados de contato que a pessoa preencheu (nome, telefone, e-mail e os demais campos). Esse acesso não depende de `contact:read`. Conceda esse escopo só a integrações que podem tratar esses dados pessoais.</Warning>
+
+- `POST /web-forms/{id}/links` gera um link atrelado a uma oportunidade e exige `web_form:write` **e** `opportunity:write`. Sem `opportunity:write`, responde `403`.
+- `property:read` e `property:write` não dão acesso a Formulários.
+
+### Webhooks globais
+
+<Note>A criação, a edição e a exclusão de webhooks globais pela API dependem de liberação da Renke; enquanto não estiverem liberadas, esses métodos respondem 404.</Note>
 
 <Tip>Revogue imediatamente qualquer chave exposta. Nunca coloque a chave em código de front-end público.</Tip>
