@@ -7853,7 +7853,8 @@
         "summary": "Cria um webhook global",
         "tags": [
           "Webhooks"
-        ]
+        ],
+        "description": "A criação, a edição e a exclusão de webhooks globais pela API dependem de liberação da Renke; enquanto não estiverem liberadas, esses métodos respondem 404."
       }
     },
     "/system-webhooks/{id}": {
@@ -7937,7 +7938,8 @@
         "summary": "Atualiza um webhook global (inclui ativar/pausar)",
         "tags": [
           "Webhooks"
-        ]
+        ],
+        "description": "A criação, a edição e a exclusão de webhooks globais pela API dependem de liberação da Renke; enquanto não estiverem liberadas, esses métodos respondem 404."
       },
       "delete": {
         "operationId": "deleteSystemWebhook",
@@ -7966,7 +7968,2189 @@
         "summary": "Remove um webhook global",
         "tags": [
           "Webhooks"
-        ]
+        ],
+        "description": "A criação, a edição e a exclusão de webhooks globais pela API dependem de liberação da Renke; enquanto não estiverem liberadas, esses métodos respondem 404."
+      }
+    },
+    "/calendar/appointments": {
+      "get": {
+        "operationId": "listCalendarAppointments",
+        "parameters": [
+          {
+            "name": "includeReminders",
+            "required": false,
+            "in": "query",
+            "description": "inclui `reminders[]` em cada item (uma leitura no motor por item; o detalhe já traz)",
+            "schema": {
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "depositOverdue",
+            "required": false,
+            "in": "query",
+            "description": "faixa \"Sinal vencido\" (aguardando, ativo, prazo antes de agora)",
+            "schema": {
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "depositStatus",
+            "required": false,
+            "in": "query",
+            "description": "filtra pelo estado do sinal",
+            "schema": {
+              "enum": [
+                "none",
+                "awaiting",
+                "paid",
+                "waived",
+                "retained",
+                "refund_pending",
+                "refunded"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "calendarId",
+            "required": false,
+            "in": "query",
+            "description": "só os agendamentos deste calendário",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "required": false,
+            "in": "query",
+            "description": "Dia civil AAAA-MM-DD; sem from/to vira o dia inteiro. Com contactId, avisa agendamento repetido no dia",
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": false,
+            "in": "query",
+            "description": "Apelido de contactRef (tela do contato)",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "opportunityRef",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactRef",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "needsReallocation",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "scheduled",
+                "cancelled"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceIds",
+            "required": false,
+            "in": "query",
+            "description": "uuids separados por vírgula",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "unitId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPassthroughDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Lista agendamentos",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `appointment:read`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      },
+      "post": {
+        "operationId": "createCalendarAppointment",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCalendarAppointmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarAppointmentResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Cria agendamento com conferência de produto",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `appointment:write`.\n\nPode disparar o aviso ao paciente, se essa notificação estiver ligada no calendário.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/appointments/{id}": {
+      "get": {
+        "operationId": "getCalendarAppointment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPassthroughDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Lê um agendamento",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `appointment:read`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/appointments/{id}/attendance": {
+      "post": {
+        "operationId": "setCalendarAppointmentAttendance",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttendanceCalendarAppointmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPassthroughDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Marca presença",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `appointment:write`.\n\nAo marcar falta, pode disparar o aviso ao paciente, se essa notificação estiver ligada no calendário.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/appointments/{id}/cancel": {
+      "post": {
+        "operationId": "cancelCalendarAppointment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelCalendarAppointmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPassthroughDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Cancela um agendamento",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `appointment:write`.\n\nPode disparar o aviso ao paciente, se essa notificação estiver ligada no calendário.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/appointments/{id}/confirmation": {
+      "post": {
+        "operationId": "setCalendarAppointmentConfirmation",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmationCalendarAppointmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPassthroughDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Marca confirmação",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `appointment:write`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/appointments/{id}/deposit": {
+      "post": {
+        "operationId": "registerCalendarAppointmentDeposit",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DepositCalendarAppointmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarAppointmentResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Registra o sinal (pago, dispensado com motivo, devolvido). Nenhum dinheiro passa pelo CRM",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `appointment:write`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/appointments/{id}/events": {
+      "get": {
+        "operationId": "listCalendarAppointmentEvents",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPassthroughDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Lista eventos do agendamento",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `appointment:read`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/appointments/{id}/note": {
+      "delete": {
+        "operationId": "deleteCalendarAppointmentNote",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Remove a observação do agendamento",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `appointment:write`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      },
+      "get": {
+        "operationId": "getCalendarAppointmentNote",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPassthroughDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Lê a observação do agendamento",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `appointment:read`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      },
+      "put": {
+        "operationId": "putCalendarAppointmentNote",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertCalendarAppointmentNoteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPassthroughDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Grava a observação do agendamento",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `appointment:write`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/appointments/{id}/reschedule": {
+      "post": {
+        "operationId": "rescheduleCalendarAppointment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RescheduleCalendarAppointmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPassthroughDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Reagenda um agendamento",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `appointment:write`.\n\nPode disparar o aviso ao paciente, se essa notificação estiver ligada no calendário.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/availability/next": {
+      "get": {
+        "operationId": "getCalendarNextAvailable",
+        "parameters": [
+          {
+            "name": "bookableId",
+            "required": true,
+            "in": "query",
+            "description": "Produto (bookable) a agendar",
+            "schema": {
+              "description": "Produto (bookable) a agendar",
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "professionalResourceId",
+            "required": false,
+            "in": "query",
+            "description": "Fixa o profissional; sem ele vale qualquer um",
+            "schema": {
+              "description": "Fixa o profissional; sem ele vale qualquer um",
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "unitId",
+            "required": false,
+            "in": "query",
+            "description": "Recorte por unidade",
+            "schema": {
+              "description": "Recorte por unidade",
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "period",
+            "required": false,
+            "in": "query",
+            "description": "Período pelo início do horário, no fuso da unidade: manhã < 12h, tarde 12h–18h, noite ≥ 18h. Padrão any",
+            "schema": {
+              "description": "Período pelo início do horário, no fuso da unidade: manhã < 12h, tarde 12h–18h, noite ≥ 18h. Padrão any",
+              "type": "string",
+              "enum": [
+                "morning",
+                "afternoon",
+                "evening",
+                "any"
+              ]
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "Dia inicial (AAAA-MM-DD) no fuso da unidade; padrão hoje",
+            "schema": {
+              "description": "Dia inicial (AAAA-MM-DD) no fuso da unidade; padrão hoje",
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarNextAvailableDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Até 5 próximos horários livres do produto até maxAdvanceDays, por período do dia",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `appointment:read`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/bookables": {
+      "get": {
+        "operationId": "listCalendarBookables",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPassthroughDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Lista serviços agendáveis",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `calendar_config:read`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/bookables/{id}": {
+      "get": {
+        "operationId": "getCalendarBookable",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarBookableDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Lê um serviço agendável",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `calendar_config:read`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/bookables/{id}/slots": {
+      "get": {
+        "operationId": "listCalendarBookableSlots",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "excludeAppointmentId",
+            "required": false,
+            "in": "query",
+            "description": "Reagendar: a reserva deste agendamento não conta como ocupada",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "professionalIds",
+            "required": false,
+            "in": "query",
+            "description": "CSV de resourceIds da equipe (exige calendarId)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "calendarId",
+            "required": false,
+            "in": "query",
+            "description": "horários do calendário (equipe + sala); sem ele, legado por profissional",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "ignoreRestrictions",
+            "required": false,
+            "in": "query",
+            "description": "Ignora restrições de dias não úteis",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "professionalResourceId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "unitId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": true,
+            "in": "query",
+            "description": "Fim da busca (ISO 8601)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": true,
+            "in": "query",
+            "description": "Início da busca (ISO 8601)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPassthroughDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Lista horários livres do serviço",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `appointment:read`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/calendars": {
+      "get": {
+        "operationId": "listCalendarCalendars",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "active",
+                "inactive"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "kind",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "shared",
+                "personal"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "unitId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPassthroughDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Lista os calendários do tenant (com equipe e produtos por id)",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `appointment:read`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/calendars/{id}": {
+      "get": {
+        "operationId": "getCalendarCalendar",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPassthroughDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Lê um calendário",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `appointment:read`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/calendars/{id}/bookables": {
+      "get": {
+        "operationId": "listCalendarCalendarBookables",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPassthroughDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Produtos do calendário (nome e preço)",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `appointment:read`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/calendars/{id}/members": {
+      "get": {
+        "operationId": "listCalendarCalendarMembers",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPassthroughDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Equipe do calendário (nome, avatar, descrição e categorias)",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `appointment:read`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/calendars/{id}/notifications": {
+      "get": {
+        "operationId": "getCalendarCalendarNotifications",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarNotificationsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Lembrete e avisos do calendário (aba Notificações)",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `appointment:read`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/resources": {
+      "get": {
+        "operationId": "listCalendarResources",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPassthroughDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Lista recursos da agenda",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `calendar_config:read`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/resources/{id}/availability-rules": {
+      "get": {
+        "operationId": "getCalendarAvailabilityRules",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "calendarId",
+            "required": false,
+            "in": "query",
+            "description": "Só as regras do profissional neste calendário; sem ele, o horário geral",
+            "schema": {
+              "description": "Só as regras do profissional neste calendário; sem ele, o horário geral",
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarAvailabilityRulesDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Lê regras de horário do recurso (com calendarId, só as daquele calendário)",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `calendar_config:read`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/settings": {
+      "get": {
+        "operationId": "getCalendarSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarSettingsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Lê as configurações da agenda do tenant",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `calendar_config:read`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/units": {
+      "get": {
+        "operationId": "listCalendarUnits",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPassthroughDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Lista unidades da agenda",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `calendar_config:read`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/waitlist": {
+      "get": {
+        "operationId": "listCalendarWaitlist",
+        "parameters": [
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "slotStartsAt",
+            "required": false,
+            "in": "query",
+            "description": "Vaga aberta (ISO 8601): marca matchesSlot em cada item",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactRef",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "professionalResourceId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "bookableId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "open (padrão) = waiting + offered",
+            "schema": {
+              "enum": [
+                "open",
+                "all",
+                "waiting",
+                "offered",
+                "booked",
+                "expired",
+                "removed"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPassthroughDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Lista de espera (padrão: aguardando + ofertados)",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `appointment:read`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      },
+      "post": {
+        "operationId": "createCalendarWaitlistEntry",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCalendarWaitlistEntryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPassthroughDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Coloca o contato na lista de espera do serviço",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `appointment:write`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/waitlist/{id}": {
+      "get": {
+        "operationId": "getCalendarWaitlistEntry",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPassthroughDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Lê um item da lista de espera",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `appointment:read`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/waitlist/{id}/events": {
+      "get": {
+        "operationId": "listCalendarWaitlistEvents",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPassthroughDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Trilha de eventos do item da lista de espera",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `appointment:read`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/waitlist/{id}/release": {
+      "post": {
+        "operationId": "releaseCalendarWaitlistEntry",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReleaseCalendarWaitlistEntryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPassthroughDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Devolve o item ofertado para a espera",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `appointment:write`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/calendar/waitlist/{id}/remove": {
+      "post": {
+        "operationId": "removeCalendarWaitlistEntry",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveCalendarWaitlistEntryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPassthroughDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Remove o item da lista de espera com motivo",
+        "tags": [
+          "Agenda"
+        ],
+        "description": "Escopo: `appointment:write`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+      }
+    },
+    "/opportunities/{opportunityId}/web-forms": {
+      "get": {
+        "operationId": "listOpportunityWebForms",
+        "parameters": [
+          {
+            "name": "opportunityId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Parte do nome do formulário",
+            "schema": {
+              "maxLength": 200,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpportunityWebFormsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Formulários prontos para publicar, com o último envio desta oportunidade",
+        "tags": [
+          "Formulários"
+        ],
+        "description": "Escopo: `web_form:read`.\n\nAceita `web_form:read` ou `opportunity:read`."
+      }
+    },
+    "/opportunities/{opportunityId}/web-forms/submissions/{submissionId}": {
+      "get": {
+        "operationId": "getOpportunityWebFormSubmission",
+        "parameters": [
+          {
+            "name": "opportunityId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "submissionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebFormSubmissionDetailDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Envio desta oportunidade, em modo leitura",
+        "tags": [
+          "Formulários"
+        ],
+        "description": "Escopo: `web_form:read`.\n\nAceita `web_form:read` ou `opportunity:read`."
+      }
+    },
+    "/web-forms": {
+      "get": {
+        "operationId": "getAllWebForms",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "exclusiveMinimum": false,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "exclusiveMaximum": false,
+              "exclusiveMinimum": false,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Busca pelo título",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "title",
+                "createdAt",
+                "updatedAt"
+              ]
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedWebFormsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Lista formulários",
+        "tags": [
+          "Formulários"
+        ],
+        "description": "Escopo: `web_form:read`."
+      },
+      "post": {
+        "operationId": "createWebForm",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWebFormDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebFormViewDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Cria formulário",
+        "tags": [
+          "Formulários"
+        ],
+        "description": "Escopo: `web_form:write`."
+      }
+    },
+    "/web-forms/{id}": {
+      "delete": {
+        "operationId": "deleteWebForm",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Exclui formulário",
+        "tags": [
+          "Formulários"
+        ],
+        "description": "Escopo: `web_form:write`."
+      },
+      "get": {
+        "operationId": "getWebForm",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebFormViewDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Obtém formulário",
+        "tags": [
+          "Formulários"
+        ],
+        "description": "Escopo: `web_form:read`."
+      },
+      "patch": {
+        "operationId": "updateWebForm",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateWebFormDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebFormViewDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Atualiza formulário (o identificador público não muda)",
+        "tags": [
+          "Formulários"
+        ],
+        "description": "Escopo: `web_form:write`."
+      }
+    },
+    "/web-forms/{id}/analytics": {
+      "get": {
+        "operationId": "getWebFormAnalytics",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "Início do período (inclusive); sem ele, desde a criação",
+            "schema": {}
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "description": "Fim do período (inclusive); sem ele, agora",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebFormAnalyticsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Indicadores do formulário no período",
+        "tags": [
+          "Formulários"
+        ],
+        "description": "Escopo: `web_form:read`."
+      }
+    },
+    "/web-forms/{id}/links": {
+      "post": {
+        "operationId": "createWebFormLink",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWebFormLinkDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebFormLinkDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Gera o link do formulário que atualiza uma oportunidade",
+        "tags": [
+          "Formulários"
+        ],
+        "description": "Escopo: `web_form:write`.\n\nExige `web_form:write` **e** `opportunity:write`. Sem `opportunity:write`, responde 403."
+      }
+    },
+    "/web-forms/{id}/submissions": {
+      "get": {
+        "operationId": "listWebFormSubmissions",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "exclusiveMinimum": false,
+              "default": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "exclusiveMaximum": false,
+              "exclusiveMinimum": false,
+              "default": 20,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "Início do período (inclusive)",
+            "schema": {}
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "description": "Fim do período (inclusive)",
+            "schema": {}
+          },
+          {
+            "name": "kind",
+            "required": false,
+            "in": "query",
+            "description": "create = novo cadastro; update = link com ID",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "create",
+                "update"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedWebFormSubmissionsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Lista os envios do formulário",
+        "tags": [
+          "Formulários"
+        ],
+        "description": "`web_form:read` dá acesso aos envios dos formulários, incluindo os dados de contato que a pessoa preencheu (nome, telefone, e-mail e os demais campos). Esse acesso não depende de `contact:read`. Conceda esse escopo só a integrações que podem tratar esses dados pessoais.\n\nEscopo: `web_form:read`."
+      }
+    },
+    "/web-forms/{id}/submissions/{submissionId}": {
+      "get": {
+        "operationId": "getWebFormSubmission",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "submissionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebFormSubmissionDetailDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "tenant-id": []
+          }
+        ],
+        "summary": "Envio completo: campos, rastreamento e falhas das ações",
+        "tags": [
+          "Formulários"
+        ],
+        "description": "`web_form:read` dá acesso aos envios dos formulários, incluindo os dados de contato que a pessoa preencheu (nome, telefone, e-mail e os demais campos). Esse acesso não depende de `contact:read`. Conceda esse escopo só a integrações que podem tratar esses dados pessoais.\n\nEscopo: `web_form:read`."
       }
     }
   },
@@ -7990,6 +10174,14 @@
     },
     {
       "name": "Tarefas"
+    },
+    {
+      "name": "Agenda",
+      "description": "Agendamentos, horários livres, calendários, equipe e lista de espera. Só responde nos tenants com o módulo Agenda ligado."
+    },
+    {
+      "name": "Formulários",
+      "description": "Formulários, links para oportunidades, indicadores e envios."
     },
     {
       "name": "Notas"
@@ -31242,6 +33434,3421 @@
           "id",
           "tagId",
           "companyId"
+        ]
+      },
+      "PaginatedWebFormsDto": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "publicId": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "type": {
+                  "description": "registration = Cadastro (link público cria o lead); capture = Captação de Informação (link da oportunidade atualiza o registro)",
+                  "type": "string",
+                  "enum": [
+                    "registration",
+                    "capture"
+                  ]
+                },
+                "createdBy": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ],
+                  "nullable": true
+                },
+                "createdAt": {},
+                "updatedAt": {}
+              },
+              "required": [
+                "id",
+                "publicId",
+                "title",
+                "type",
+                "createdBy",
+                "createdAt",
+                "updatedAt"
+              ]
+            }
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "perPage": {
+                "type": "number"
+              },
+              "currentPage": {
+                "type": "number"
+              },
+              "totalItems": {
+                "type": "number"
+              },
+              "totalPages": {
+                "type": "number"
+              },
+              "hasMore": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "perPage",
+              "currentPage",
+              "totalItems",
+              "totalPages",
+              "hasMore"
+            ]
+          }
+        },
+        "required": [
+          "rows",
+          "meta"
+        ]
+      },
+      "CalendarAppointmentResponseDto": {
+        "type": "object",
+        "properties": {
+          "bypassedRestrictions": {
+            "type": "boolean"
+          },
+          "professionalName": {
+            "type": "string",
+            "nullable": true
+          },
+          "professionalNames": {
+            "description": "equipe alocada; o primeiro é professionalName",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "depositStatus": {
+            "type": "string",
+            "enum": [
+              "none",
+              "awaiting",
+              "paid",
+              "waived",
+              "retained",
+              "refund_pending",
+              "refunded"
+            ]
+          },
+          "depositAmountCents": {
+            "type": "integer",
+            "nullable": true
+          },
+          "depositDueAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "depositOverdue": {
+            "description": "aguardando com prazo vencido (faixa \"Sinal vencido\")",
+            "type": "boolean"
+          },
+          "depositPaidCents": {
+            "type": "integer",
+            "nullable": true
+          },
+          "depositMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "depositPaidAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "depositNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "depositRecordedByRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "depositRecordedAt": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CreateCalendarWaitlistEntryDto": {
+        "type": "object",
+        "properties": {
+          "contactRef": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bookableId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "professionalResourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "preferredPeriod": {
+            "type": "string",
+            "enum": [
+              "morning",
+              "afternoon",
+              "evening",
+              "any"
+            ]
+          },
+          "dateFrom": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "dateTo": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "expiresOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "note": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "contactRef",
+          "bookableId"
+        ]
+      },
+      "WebFormSubmissionDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {},
+          "kind": {
+            "type": "string",
+            "enum": [
+              "create",
+              "update"
+            ]
+          },
+          "contact": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string",
+                "nullable": true
+              },
+              "deleted": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "phone",
+              "deleted"
+            ],
+            "nullable": true
+          },
+          "opportunity": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              },
+              "deleted": {
+                "description": "Excluída depois do envio: o envio continua na lista",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "deleted"
+            ],
+            "nullable": true
+          },
+          "utmSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "utmCampaign": {
+            "type": "string",
+            "nullable": true
+          },
+          "hasActionErrors": {
+            "type": "boolean"
+          },
+          "values": {
+            "description": "Campos enviados, na ordem do formulário",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "elementId": {
+                  "type": "string"
+                },
+                "label": {
+                  "description": "Rótulo no momento do envio; null = não recuperável",
+                  "type": "string",
+                  "nullable": true
+                },
+                "type": {
+                  "description": "Tipo da propriedade no momento do envio (TEXT, EMAIL…)",
+                  "type": "string",
+                  "nullable": true
+                },
+                "value": {},
+                "removed": {
+                  "description": "O campo não existe mais na versão atual do formulário",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "elementId",
+                "label",
+                "type",
+                "value",
+                "removed"
+              ]
+            }
+          },
+          "tracking": {
+            "description": "Parâmetros de rastreamento recebidos (US-483)",
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "actionErrors": {
+            "description": "Ações após o envio que falharam (US-488)",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "createdAt",
+          "kind",
+          "contact",
+          "opportunity",
+          "utmSource",
+          "utmCampaign",
+          "hasActionErrors",
+          "values",
+          "tracking",
+          "actionErrors"
+        ]
+      },
+      "RescheduleCalendarAppointmentDto": {
+        "type": "object",
+        "properties": {
+          "startsAt": {
+            "type": "string",
+            "minLength": 1
+          },
+          "professionalResourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "anyProfessional": {
+            "type": "boolean"
+          },
+          "calendarId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "professionalIds": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "bypassedRestrictions": {
+            "type": "boolean"
+          },
+          "override": {
+            "type": "object",
+            "properties": {
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "reason"
+            ]
+          },
+          "version": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "startsAt",
+          "version"
+        ]
+      },
+      "CalendarAvailabilityRulesDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "ruleType": {
+                  "type": "string",
+                  "enum": [
+                    "weekly_window",
+                    "date_window",
+                    "block"
+                  ]
+                },
+                "unitId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "nullable": true
+                },
+                "weekday": {
+                  "type": "integer",
+                  "nullable": true
+                },
+                "dateFrom": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "dateUntil": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "startTime": {
+                  "type": "string"
+                },
+                "endTime": {
+                  "type": "string"
+                },
+                "capacity": {
+                  "type": "integer",
+                  "nullable": true
+                },
+                "priority": {
+                  "type": "integer",
+                  "nullable": true
+                },
+                "source": {
+                  "description": "`day-block:<AAAA-MM-DD>` no dia bloqueado; nula na regra manual",
+                  "type": "string",
+                  "nullable": true
+                },
+                "label": {
+                  "description": "Motivo do bloqueio do dia",
+                  "type": "string",
+                  "nullable": true
+                },
+                "calendarId": {
+                  "description": "Calendário do horário próprio do profissional; nulo é o horário geral",
+                  "type": "string",
+                  "format": "uuid",
+                  "nullable": true
+                }
+              },
+              "required": [
+                "id",
+                "ruleType",
+                "unitId",
+                "weekday",
+                "dateFrom",
+                "dateUntil",
+                "startTime",
+                "endTime",
+                "capacity",
+                "priority",
+                "source",
+                "label",
+                "calendarId"
+              ]
+            }
+          },
+          "version": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "version"
+        ]
+      },
+      "WebFormViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "publicId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "description": "registration = Cadastro (link público cria o lead); capture = Captação de Informação (link da oportunidade atualiza o registro)",
+            "type": "string",
+            "enum": [
+              "registration",
+              "capture"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "elements": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "field"
+                      ]
+                    },
+                    "id": {
+                      "description": "Gerado pelo cliente; estável para as regras de exibição (US-479)",
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "propertyId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "entityType": {
+                      "type": "string",
+                      "enum": [
+                        "CONTACT",
+                        "OPPORTUNITY",
+                        "COMPANY"
+                      ]
+                    },
+                    "label": {
+                      "description": "Rótulo local: não altera o cadastro da propriedade",
+                      "type": "string",
+                      "maxLength": 200,
+                      "nullable": true
+                    },
+                    "placeholder": {
+                      "type": "string",
+                      "maxLength": 200,
+                      "nullable": true
+                    },
+                    "helpText": {
+                      "type": "string",
+                      "maxLength": 500,
+                      "nullable": true
+                    },
+                    "required": {
+                      "type": "boolean"
+                    },
+                    "hidden": {
+                      "type": "boolean"
+                    },
+                    "urlParam": {
+                      "description": "Parâmetro da URL que preenche o campo oculto",
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                      "nullable": true
+                    },
+                    "width": {
+                      "type": "string",
+                      "enum": [
+                        "full",
+                        "half"
+                      ]
+                    },
+                    "visibility": {
+                      "description": "Mostrar o campo só quando as regras valem (US-479)",
+                      "type": "object",
+                      "properties": {
+                        "combinator": {
+                          "type": "string",
+                          "enum": [
+                            "and",
+                            "or"
+                          ]
+                        },
+                        "rules": {
+                          "type": "array",
+                          "minItems": 1,
+                          "maxItems": 10,
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "sourceId": {
+                                "description": "Campo de origem; tem de vir antes no formulário",
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "operator": {
+                                "type": "string",
+                                "enum": [
+                                  "equals",
+                                  "contains",
+                                  "filled",
+                                  "empty",
+                                  "gt",
+                                  "lt",
+                                  "in",
+                                  "not_in"
+                                ]
+                              },
+                              "value": {
+                                "description": "Texto, número ou data; lista de opções em «in» e «not_in»",
+                                "oneOf": [
+                                  {
+                                    "type": "string",
+                                    "maxLength": 500
+                                  },
+                                  {
+                                    "type": "array",
+                                    "maxItems": 200,
+                                    "items": {
+                                      "type": "string",
+                                      "maxLength": 500
+                                    }
+                                  }
+                                ],
+                                "nullable": true
+                              }
+                            },
+                            "required": [
+                              "sourceId",
+                              "operator",
+                              "value"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "combinator",
+                        "rules"
+                      ],
+                      "nullable": true
+                    },
+                    "unavailable": {
+                      "description": "Propriedade excluída: o campo não é renderizado",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "propertyId",
+                    "entityType",
+                    "label",
+                    "placeholder",
+                    "helpText",
+                    "required",
+                    "hidden",
+                    "urlParam",
+                    "width",
+                    "unavailable"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "heading"
+                      ]
+                    },
+                    "id": {
+                      "description": "Gerado pelo cliente; estável para as regras de exibição (US-479)",
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "text": {
+                      "type": "string",
+                      "maxLength": 200,
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "text"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "text"
+                      ]
+                    },
+                    "id": {
+                      "description": "Gerado pelo cliente; estável para as regras de exibição (US-479)",
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "text": {
+                      "type": "string",
+                      "maxLength": 5000,
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "text"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "image"
+                      ]
+                    },
+                    "id": {
+                      "description": "Gerado pelo cliente; estável para as regras de exibição (US-479)",
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "url": {
+                      "type": "string",
+                      "format": "uri",
+                      "maxLength": 2048
+                    },
+                    "alt": {
+                      "type": "string",
+                      "maxLength": 200,
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "url",
+                    "alt"
+                  ]
+                }
+              ]
+            }
+          },
+          "styles": {
+            "type": "object",
+            "properties": {
+              "layout": {
+                "type": "string",
+                "enum": [
+                  "one-column",
+                  "two-columns",
+                  "one-per-page"
+                ]
+              },
+              "theme": {
+                "type": "string",
+                "enum": [
+                  "light",
+                  "dark"
+                ],
+                "nullable": true
+              },
+              "primaryColor": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "nullable": true
+              },
+              "coverColor": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "nullable": true
+              },
+              "coverPositionY": {
+                "description": "Posição vertical (0–100) do object-position da capa",
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMinimum": false,
+                "maximum": 100,
+                "exclusiveMaximum": false,
+                "nullable": true
+              },
+              "backgroundColor": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "nullable": true
+              },
+              "backgroundImageUrl": {
+                "type": "string",
+                "format": "uri",
+                "maxLength": 2048,
+                "nullable": true
+              },
+              "coverImageUrl": {
+                "type": "string",
+                "format": "uri",
+                "maxLength": 2048,
+                "nullable": true
+              },
+              "logoUrl": {
+                "type": "string",
+                "format": "uri",
+                "maxLength": 2048,
+                "nullable": true
+              },
+              "logoEmoji": {
+                "description": "Avatar em emoji (um grafema); quando preenchido, o logo de imagem é ignorado",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 32,
+                "nullable": true
+              },
+              "backgroundMedia": {
+                "description": "Camada 1: mídia por cima da cor de fundo (substitui backgroundImageUrl)",
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "color",
+                      "gradient",
+                      "image"
+                    ]
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2048
+                  }
+                },
+                "required": [
+                  "kind",
+                  "value"
+                ],
+                "nullable": true
+              },
+              "backgroundPositionY": {
+                "description": "Posição vertical (0–100) da imagem de fundo",
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMinimum": false,
+                "maximum": 100,
+                "exclusiveMaximum": false,
+                "nullable": true
+              },
+              "headerCover": {
+                "description": "Camada 2: capa de header de ponta a ponta",
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "color",
+                      "gradient",
+                      "image"
+                    ]
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2048
+                  }
+                },
+                "required": [
+                  "kind",
+                  "value"
+                ],
+                "nullable": true
+              },
+              "headerPositionY": {
+                "description": "Posição vertical (0–100) da capa de header",
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMinimum": false,
+                "maximum": 100,
+                "exclusiveMaximum": false,
+                "nullable": true
+              },
+              "headerLogoUrl": {
+                "description": "Logo grande centralizado na capa de header",
+                "type": "string",
+                "format": "uri",
+                "maxLength": 2048,
+                "nullable": true
+              },
+              "cardCover": {
+                "description": "Camada 3: capa do cartão (substitui coverImageUrl/coverColor)",
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "color",
+                      "gradient",
+                      "image"
+                    ]
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2048
+                  }
+                },
+                "required": [
+                  "kind",
+                  "value"
+                ],
+                "nullable": true
+              },
+              "cardCoverPositionY": {
+                "description": "Posição vertical (0–100) da capa do cartão",
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMinimum": false,
+                "maximum": 100,
+                "exclusiveMaximum": false,
+                "nullable": true
+              },
+              "buttonColor": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "nullable": true
+              },
+              "buttonTextColor": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "nullable": true
+              },
+              "fieldAccentColor": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "nullable": true
+              },
+              "submitLabel": {
+                "description": "Texto do botão de envio; vazio usa «Enviar»",
+                "type": "string",
+                "maxLength": 60,
+                "nullable": true
+              }
+            }
+          },
+          "pages": {
+            "type": "object",
+            "properties": {
+              "start": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "title": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "nullable": true
+                  },
+                  "text": {
+                    "type": "string",
+                    "maxLength": 5000,
+                    "nullable": true
+                  },
+                  "buttonText": {
+                    "type": "string",
+                    "maxLength": 60,
+                    "nullable": true
+                  }
+                }
+              },
+              "thankYou": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "nullable": true
+                  },
+                  "text": {
+                    "type": "string",
+                    "maxLength": 5000,
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          },
+          "settings": {
+            "type": "object",
+            "properties": {
+              "pipelineId": {
+                "type": "string",
+                "format": "uuid",
+                "nullable": true
+              },
+              "pipelineStageId": {
+                "type": "string",
+                "format": "uuid",
+                "nullable": true
+              },
+              "redirectUrl": {
+                "description": "Após o envio: com URL redireciona; sem, mostra o agradecimento",
+                "type": "string",
+                "format": "uri",
+                "maxLength": 2048,
+                "nullable": true
+              },
+              "forwardTrackingParams": {
+                "description": "Repassa os parâmetros de rastreamento à URL do redirect",
+                "type": "boolean"
+              },
+              "termsUrl": {
+                "description": "Termos de uso e política de privacidade (link do aceite LGPD)",
+                "type": "string",
+                "format": "uri",
+                "maxLength": 2048,
+                "nullable": true
+              },
+              "updateFilledFields": {
+                "description": "Com ID na URL: sobrescreve campos que já têm valor",
+                "type": "boolean"
+              },
+              "updateAllFields": {
+                "description": "Cadastro: contato já existente tem todos os campos atualizados com o envio; desligado, só os vazios",
+                "type": "boolean"
+              },
+              "populateWithFilledData": {
+                "description": "Com ID na URL: mostra os valores atuais nos campos",
+                "type": "boolean"
+              },
+              "opportunityNameTemplate": {
+                "description": "Nome da oportunidade: texto com {{form_name}}, {{contact_name}}, {{contact_email}}, {{contact_phone}} e {{field:<id de campo do contato>}}; vazio = «<formulário> - <contato>»",
+                "type": "string",
+                "maxLength": 200,
+                "nullable": true
+              },
+              "updateOpportunityName": {
+                "description": "Captação: «Modificar» troca o nome inteiro da oportunidade pelo modelo a cada envio",
+                "type": "boolean"
+              },
+              "postSubmitActions": {
+                "type": "array",
+                "maxItems": 10,
+                "items": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "set_owner"
+                          ]
+                        },
+                        "userId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "nullable": true
+                        },
+                        "entity": {
+                          "description": "Captação: a entidade que troca de responsável; sem entidade (Cadastro) vale para contato e oportunidade",
+                          "type": "string",
+                          "enum": [
+                            "opportunity",
+                            "contact",
+                            "company"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "userId"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "add_tags"
+                          ]
+                        },
+                        "tagIds": {
+                          "type": "array",
+                          "minItems": 1,
+                          "maxItems": 50,
+                          "items": {
+                            "type": "string",
+                            "format": "uuid"
+                          }
+                        },
+                        "entity": {
+                          "type": "string",
+                          "enum": [
+                            "opportunity",
+                            "contact",
+                            "company"
+                          ],
+                          "default": "opportunity"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "tagIds"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "emailNotification": {
+                "description": "E-mail a cada envio (US-501): responsável da oportunidade e extras; sem a chave, ligado",
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "extraEmails": {
+                    "type": "array",
+                    "maxItems": 10,
+                    "items": {
+                      "type": "string",
+                      "format": "email"
+                    }
+                  }
+                },
+                "required": [
+                  "enabled",
+                  "extraEmails"
+                ]
+              }
+            }
+          },
+          "createdBy": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ],
+            "nullable": true
+          },
+          "updatedBy": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ],
+            "nullable": true
+          },
+          "createdAt": {},
+          "updatedAt": {}
+        },
+        "required": [
+          "id",
+          "publicId",
+          "title",
+          "type",
+          "description",
+          "elements",
+          "styles",
+          "pages",
+          "settings",
+          "createdBy",
+          "updatedBy",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "PaginatedWebFormSubmissionsDto": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "createdAt": {},
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "create",
+                    "update"
+                  ]
+                },
+                "contact": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "deleted": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "phone",
+                    "deleted"
+                  ],
+                  "nullable": true
+                },
+                "opportunity": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "deleted": {
+                      "description": "Excluída depois do envio: o envio continua na lista",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "deleted"
+                  ],
+                  "nullable": true
+                },
+                "utmSource": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "utmCampaign": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "hasActionErrors": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "createdAt",
+                "kind",
+                "contact",
+                "opportunity",
+                "utmSource",
+                "utmCampaign",
+                "hasActionErrors"
+              ]
+            }
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "perPage": {
+                "type": "number"
+              },
+              "currentPage": {
+                "type": "number"
+              },
+              "totalItems": {
+                "type": "number"
+              },
+              "totalPages": {
+                "type": "number"
+              },
+              "hasMore": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "perPage",
+              "currentPage",
+              "totalItems",
+              "totalPages",
+              "hasMore"
+            ]
+          }
+        },
+        "required": [
+          "rows",
+          "meta"
+        ]
+      },
+      "UpsertCalendarAppointmentNoteDto": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "CalendarNotificationsDto": {
+        "type": "object",
+        "properties": {
+          "reminderEnabled": {
+            "description": "Lembrete antes do horário ligado",
+            "type": "boolean"
+          },
+          "reminderLeadsMinutes": {
+            "description": "Horário fixo (26/10): pode ficar vazia quando há lembrete em horário fixo; relativos + fixos somam de 1 a 3. Antecedências do lembrete em minutos (1 a 3, sem repetição; a resposta vem da maior para a menor)",
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+              "type": "integer",
+              "minimum": 1,
+              "exclusiveMinimum": false,
+              "maximum": 10080,
+              "exclusiveMaximum": false
+            }
+          },
+          "reminderTemplate": {
+            "description": "Texto do lembrete com {contato} {servico} {data} {hora} {unidade}; null = texto padrão",
+            "type": "string",
+            "nullable": true
+          },
+          "reminderTemplates": {
+            "description": "Texto de cada lembrete (até 3, um por antecedência de reminderLeadsMinutes); sem texto próprio = reminderTemplate",
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+              "type": "object",
+              "properties": {
+                "leadMinutes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "exclusiveMinimum": false
+                },
+                "template": {
+                  "type": "string",
+                  "nullable": true
+                }
+              },
+              "required": [
+                "leadMinutes",
+                "template"
+              ]
+            },
+            "nullable": true
+          },
+          "confirmationLeadMinutes": {
+            "description": "Quando a Confirmação sai: minutos antes do horário; null = ao agendar",
+            "type": "integer",
+            "minimum": 1,
+            "exclusiveMinimum": false,
+            "maximum": 10080,
+            "exclusiveMaximum": false,
+            "nullable": true
+          },
+          "confirmationTemplate": {
+            "description": "Texto do aviso de agendamento (acordeão Confirmação), mesmas variáveis do lembrete; null = texto padrão",
+            "type": "string",
+            "nullable": true
+          },
+          "secondConfirmationLeadMinutes": {
+            "description": "Segunda Confirmação (no máximo 2): minutos antes do horário; null = sem segunda. Só sai se o contato ainda não confirmou nem pediu para reagendar",
+            "type": "integer",
+            "minimum": 1,
+            "exclusiveMinimum": false,
+            "maximum": 10080,
+            "exclusiveMaximum": false,
+            "nullable": true
+          },
+          "secondConfirmationTemplate": {
+            "description": "Texto da segunda Confirmação; null = texto padrão próprio da 2ª (nunca o da primeira)",
+            "type": "string",
+            "nullable": true
+          },
+          "reminderFixedTimes": {
+            "description": "Horário fixo: lembretes \"N dias antes, às HH:MM\" no fuso do calendário; relativos + fixos somam até 3",
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+              "type": "object",
+              "properties": {
+                "daysBefore": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "exclusiveMinimum": false,
+                  "maximum": 30,
+                  "exclusiveMaximum": false
+                },
+                "time": {
+                  "type": "string",
+                  "pattern": "^([01]\\d|2[0-3]):(00|15|30|45)$"
+                },
+                "template": {
+                  "type": "string",
+                  "nullable": true
+                }
+              },
+              "required": [
+                "daysBefore",
+                "time"
+              ]
+            },
+            "nullable": true
+          },
+          "confirmationFixedTime": {
+            "description": "Horário fixo da Confirmação 1; null = relativa",
+            "type": "object",
+            "properties": {
+              "daysBefore": {
+                "type": "integer",
+                "minimum": 0,
+                "exclusiveMinimum": false,
+                "maximum": 30,
+                "exclusiveMaximum": false
+              },
+              "time": {
+                "type": "string",
+                "pattern": "^([01]\\d|2[0-3]):(00|15|30|45)$"
+              }
+            },
+            "required": [
+              "daysBefore",
+              "time"
+            ],
+            "nullable": true
+          },
+          "secondConfirmationFixedTime": {
+            "description": "Horário fixo da Confirmação 2; null = relativa",
+            "type": "object",
+            "properties": {
+              "daysBefore": {
+                "type": "integer",
+                "minimum": 0,
+                "exclusiveMinimum": false,
+                "maximum": 30,
+                "exclusiveMaximum": false
+              },
+              "time": {
+                "type": "string",
+                "pattern": "^([01]\\d|2[0-3]):(00|15|30|45)$"
+              }
+            },
+            "required": [
+              "daysBefore",
+              "time"
+            ],
+            "nullable": true
+          },
+          "notifyWhatsapp": {
+            "description": "Canal WhatsApp (lembrete e avisos)",
+            "type": "boolean"
+          },
+          "whatsappChannelId": {
+            "description": "Conta (canal/conexão) de WhatsApp por onde lembrete e avisos saem; null = padrão (conversa do contato ou a conta não oficial mais antiga)",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "nullable": true
+          },
+          "notifyEmail": {
+            "description": "Canal e-mail (lembrete; sem WhatsApp, vai por e-mail)",
+            "type": "boolean"
+          },
+          "confirmationLinkEnabled": {
+            "description": "Link \"Confirmar / Não vou poder ir\" no lembrete",
+            "type": "boolean"
+          },
+          "notifyBooked": {
+            "description": "Aviso de agendado, reagendado e realocado",
+            "type": "boolean"
+          },
+          "notifyCancelled": {
+            "description": "Aviso de cancelado",
+            "type": "boolean"
+          },
+          "notifyNoShow": {
+            "description": "Mensagem de falta convidando a remarcar",
+            "type": "boolean"
+          },
+          "calendarId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "reminderEnabled",
+          "reminderLeadsMinutes",
+          "reminderTemplate",
+          "notifyWhatsapp",
+          "notifyEmail",
+          "confirmationLinkEnabled",
+          "notifyBooked",
+          "notifyCancelled",
+          "notifyNoShow",
+          "calendarId"
+        ]
+      },
+      "CreateWebFormLinkDto": {
+        "type": "object",
+        "properties": {
+          "opportunityId": {
+            "description": "Oportunidade que o envio por este link vai atualizar",
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "opportunityId"
+        ]
+      },
+      "CreateWebFormDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "type": {
+            "description": "registration = Cadastro (link público cria o lead); capture = Captação de Informação (link da oportunidade atualiza o registro)",
+            "type": "string",
+            "enum": [
+              "registration",
+              "capture"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2000,
+            "nullable": true
+          },
+          "elements": {
+            "description": "Campos e blocos de conteúdo, na ordem de exibição",
+            "type": "array",
+            "maxItems": 200,
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "field"
+                      ]
+                    },
+                    "id": {
+                      "description": "Gerado pelo cliente; estável para as regras de exibição (US-479)",
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "propertyId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "entityType": {
+                      "type": "string",
+                      "enum": [
+                        "CONTACT",
+                        "OPPORTUNITY",
+                        "COMPANY"
+                      ]
+                    },
+                    "label": {
+                      "description": "Rótulo local: não altera o cadastro da propriedade",
+                      "type": "string",
+                      "maxLength": 200,
+                      "nullable": true
+                    },
+                    "placeholder": {
+                      "type": "string",
+                      "maxLength": 200,
+                      "nullable": true
+                    },
+                    "helpText": {
+                      "type": "string",
+                      "maxLength": 500,
+                      "nullable": true
+                    },
+                    "required": {
+                      "type": "boolean"
+                    },
+                    "hidden": {
+                      "type": "boolean"
+                    },
+                    "urlParam": {
+                      "description": "Parâmetro da URL que preenche o campo oculto",
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                      "nullable": true
+                    },
+                    "width": {
+                      "type": "string",
+                      "enum": [
+                        "full",
+                        "half"
+                      ]
+                    },
+                    "visibility": {
+                      "description": "Mostrar o campo só quando as regras valem (US-479)",
+                      "type": "object",
+                      "properties": {
+                        "combinator": {
+                          "type": "string",
+                          "enum": [
+                            "and",
+                            "or"
+                          ]
+                        },
+                        "rules": {
+                          "type": "array",
+                          "minItems": 1,
+                          "maxItems": 10,
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "sourceId": {
+                                "description": "Campo de origem; tem de vir antes no formulário",
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "operator": {
+                                "type": "string",
+                                "enum": [
+                                  "equals",
+                                  "contains",
+                                  "filled",
+                                  "empty",
+                                  "gt",
+                                  "lt",
+                                  "in",
+                                  "not_in"
+                                ]
+                              },
+                              "value": {
+                                "description": "Texto, número ou data; lista de opções em «in» e «not_in»",
+                                "oneOf": [
+                                  {
+                                    "type": "string",
+                                    "maxLength": 500
+                                  },
+                                  {
+                                    "type": "array",
+                                    "maxItems": 200,
+                                    "items": {
+                                      "type": "string",
+                                      "maxLength": 500
+                                    }
+                                  }
+                                ],
+                                "nullable": true
+                              }
+                            },
+                            "required": [
+                              "sourceId",
+                              "operator",
+                              "value"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "combinator",
+                        "rules"
+                      ],
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "propertyId",
+                    "entityType",
+                    "label",
+                    "placeholder",
+                    "helpText",
+                    "required",
+                    "hidden",
+                    "urlParam",
+                    "width"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "heading"
+                      ]
+                    },
+                    "id": {
+                      "description": "Gerado pelo cliente; estável para as regras de exibição (US-479)",
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "text": {
+                      "type": "string",
+                      "maxLength": 200,
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "text"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "text"
+                      ]
+                    },
+                    "id": {
+                      "description": "Gerado pelo cliente; estável para as regras de exibição (US-479)",
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "text": {
+                      "type": "string",
+                      "maxLength": 5000,
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "text"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "image"
+                      ]
+                    },
+                    "id": {
+                      "description": "Gerado pelo cliente; estável para as regras de exibição (US-479)",
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "url": {
+                      "type": "string",
+                      "format": "uri",
+                      "maxLength": 2048
+                    },
+                    "alt": {
+                      "type": "string",
+                      "maxLength": 200,
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "url",
+                    "alt"
+                  ]
+                }
+              ]
+            }
+          },
+          "styles": {
+            "type": "object",
+            "properties": {
+              "layout": {
+                "type": "string",
+                "enum": [
+                  "one-column",
+                  "two-columns",
+                  "one-per-page"
+                ]
+              },
+              "theme": {
+                "type": "string",
+                "enum": [
+                  "light",
+                  "dark"
+                ],
+                "nullable": true
+              },
+              "primaryColor": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "nullable": true
+              },
+              "coverColor": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "nullable": true
+              },
+              "coverPositionY": {
+                "description": "Posição vertical (0–100) do object-position da capa",
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMinimum": false,
+                "maximum": 100,
+                "exclusiveMaximum": false,
+                "nullable": true
+              },
+              "backgroundColor": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "nullable": true
+              },
+              "backgroundImageUrl": {
+                "type": "string",
+                "format": "uri",
+                "maxLength": 2048,
+                "nullable": true
+              },
+              "coverImageUrl": {
+                "type": "string",
+                "format": "uri",
+                "maxLength": 2048,
+                "nullable": true
+              },
+              "logoUrl": {
+                "type": "string",
+                "format": "uri",
+                "maxLength": 2048,
+                "nullable": true
+              },
+              "logoEmoji": {
+                "description": "Avatar em emoji (um grafema); quando preenchido, o logo de imagem é ignorado",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 32,
+                "nullable": true
+              },
+              "backgroundMedia": {
+                "description": "Camada 1: mídia por cima da cor de fundo (substitui backgroundImageUrl)",
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "color",
+                      "gradient",
+                      "image"
+                    ]
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2048
+                  }
+                },
+                "required": [
+                  "kind",
+                  "value"
+                ],
+                "nullable": true
+              },
+              "backgroundPositionY": {
+                "description": "Posição vertical (0–100) da imagem de fundo",
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMinimum": false,
+                "maximum": 100,
+                "exclusiveMaximum": false,
+                "nullable": true
+              },
+              "headerCover": {
+                "description": "Camada 2: capa de header de ponta a ponta",
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "color",
+                      "gradient",
+                      "image"
+                    ]
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2048
+                  }
+                },
+                "required": [
+                  "kind",
+                  "value"
+                ],
+                "nullable": true
+              },
+              "headerPositionY": {
+                "description": "Posição vertical (0–100) da capa de header",
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMinimum": false,
+                "maximum": 100,
+                "exclusiveMaximum": false,
+                "nullable": true
+              },
+              "headerLogoUrl": {
+                "description": "Logo grande centralizado na capa de header",
+                "type": "string",
+                "format": "uri",
+                "maxLength": 2048,
+                "nullable": true
+              },
+              "cardCover": {
+                "description": "Camada 3: capa do cartão (substitui coverImageUrl/coverColor)",
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "color",
+                      "gradient",
+                      "image"
+                    ]
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2048
+                  }
+                },
+                "required": [
+                  "kind",
+                  "value"
+                ],
+                "nullable": true
+              },
+              "cardCoverPositionY": {
+                "description": "Posição vertical (0–100) da capa do cartão",
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMinimum": false,
+                "maximum": 100,
+                "exclusiveMaximum": false,
+                "nullable": true
+              },
+              "buttonColor": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "nullable": true
+              },
+              "buttonTextColor": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "nullable": true
+              },
+              "fieldAccentColor": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "nullable": true
+              },
+              "submitLabel": {
+                "description": "Texto do botão de envio; vazio usa «Enviar»",
+                "type": "string",
+                "maxLength": 60,
+                "nullable": true
+              }
+            }
+          },
+          "pages": {
+            "type": "object",
+            "properties": {
+              "start": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "title": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "nullable": true
+                  },
+                  "text": {
+                    "type": "string",
+                    "maxLength": 5000,
+                    "nullable": true
+                  },
+                  "buttonText": {
+                    "type": "string",
+                    "maxLength": 60,
+                    "nullable": true
+                  }
+                }
+              },
+              "thankYou": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "nullable": true
+                  },
+                  "text": {
+                    "type": "string",
+                    "maxLength": 5000,
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          },
+          "settings": {
+            "type": "object",
+            "properties": {
+              "pipelineId": {
+                "type": "string",
+                "format": "uuid",
+                "nullable": true
+              },
+              "pipelineStageId": {
+                "type": "string",
+                "format": "uuid",
+                "nullable": true
+              },
+              "redirectUrl": {
+                "description": "Após o envio: com URL redireciona; sem, mostra o agradecimento",
+                "type": "string",
+                "format": "uri",
+                "maxLength": 2048,
+                "nullable": true
+              },
+              "forwardTrackingParams": {
+                "description": "Repassa os parâmetros de rastreamento à URL do redirect",
+                "type": "boolean"
+              },
+              "termsUrl": {
+                "description": "Termos de uso e política de privacidade (link do aceite LGPD)",
+                "type": "string",
+                "format": "uri",
+                "maxLength": 2048,
+                "nullable": true
+              },
+              "updateFilledFields": {
+                "description": "Com ID na URL: sobrescreve campos que já têm valor",
+                "type": "boolean"
+              },
+              "updateAllFields": {
+                "description": "Cadastro: contato já existente tem todos os campos atualizados com o envio; desligado, só os vazios",
+                "type": "boolean"
+              },
+              "populateWithFilledData": {
+                "description": "Com ID na URL: mostra os valores atuais nos campos",
+                "type": "boolean"
+              },
+              "opportunityNameTemplate": {
+                "description": "Nome da oportunidade: texto com {{form_name}}, {{contact_name}}, {{contact_email}}, {{contact_phone}} e {{field:<id de campo do contato>}}; vazio = «<formulário> - <contato>»",
+                "type": "string",
+                "maxLength": 200,
+                "nullable": true
+              },
+              "updateOpportunityName": {
+                "description": "Captação: «Modificar» troca o nome inteiro da oportunidade pelo modelo a cada envio",
+                "type": "boolean"
+              },
+              "postSubmitActions": {
+                "type": "array",
+                "maxItems": 10,
+                "items": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "set_owner"
+                          ]
+                        },
+                        "userId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "nullable": true
+                        },
+                        "entity": {
+                          "description": "Captação: a entidade que troca de responsável; sem entidade (Cadastro) vale para contato e oportunidade",
+                          "type": "string",
+                          "enum": [
+                            "opportunity",
+                            "contact",
+                            "company"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "userId"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "add_tags"
+                          ]
+                        },
+                        "tagIds": {
+                          "type": "array",
+                          "minItems": 1,
+                          "maxItems": 50,
+                          "items": {
+                            "type": "string",
+                            "format": "uuid"
+                          }
+                        },
+                        "entity": {
+                          "type": "string",
+                          "enum": [
+                            "opportunity",
+                            "contact",
+                            "company"
+                          ],
+                          "default": "opportunity"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "tagIds"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "emailNotification": {
+                "description": "E-mail a cada envio (US-501): responsável da oportunidade e extras; sem a chave, ligado",
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "extraEmails": {
+                    "type": "array",
+                    "maxItems": 10,
+                    "items": {
+                      "type": "string",
+                      "format": "email"
+                    }
+                  }
+                },
+                "required": [
+                  "enabled",
+                  "extraEmails"
+                ]
+              }
+            }
+          }
+        },
+        "required": [
+          "title"
+        ]
+      },
+      "CreateCalendarAppointmentDto": {
+        "type": "object",
+        "properties": {
+          "bookableId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "startsAt": {
+            "type": "string",
+            "minLength": 1
+          },
+          "contactRef": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "newContact": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "phone": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "name",
+              "phone"
+            ]
+          },
+          "opportunityRef": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "shared",
+              "private"
+            ]
+          },
+          "professionalResourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "calendarId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "professionalIds": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "onBehalfOfRef": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bypassedRestrictions": {
+            "type": "boolean"
+          },
+          "override": {
+            "type": "object",
+            "properties": {
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "reason"
+            ]
+          },
+          "waitlistEntryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requireDeposit": {
+            "type": "boolean"
+          },
+          "receptionNote": {
+            "type": "string",
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "bookableId",
+          "startsAt",
+          "receptionNote"
+        ]
+      },
+      "UpdateWebFormDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "type": {
+            "description": "registration = Cadastro (link público cria o lead); capture = Captação de Informação (link da oportunidade atualiza o registro)",
+            "type": "string",
+            "enum": [
+              "registration",
+              "capture"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2000,
+            "nullable": true
+          },
+          "elements": {
+            "description": "Campos e blocos de conteúdo, na ordem de exibição",
+            "type": "array",
+            "maxItems": 200,
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "field"
+                      ]
+                    },
+                    "id": {
+                      "description": "Gerado pelo cliente; estável para as regras de exibição (US-479)",
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "propertyId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "entityType": {
+                      "type": "string",
+                      "enum": [
+                        "CONTACT",
+                        "OPPORTUNITY",
+                        "COMPANY"
+                      ]
+                    },
+                    "label": {
+                      "description": "Rótulo local: não altera o cadastro da propriedade",
+                      "type": "string",
+                      "maxLength": 200,
+                      "nullable": true
+                    },
+                    "placeholder": {
+                      "type": "string",
+                      "maxLength": 200,
+                      "nullable": true
+                    },
+                    "helpText": {
+                      "type": "string",
+                      "maxLength": 500,
+                      "nullable": true
+                    },
+                    "required": {
+                      "type": "boolean"
+                    },
+                    "hidden": {
+                      "type": "boolean"
+                    },
+                    "urlParam": {
+                      "description": "Parâmetro da URL que preenche o campo oculto",
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                      "nullable": true
+                    },
+                    "width": {
+                      "type": "string",
+                      "enum": [
+                        "full",
+                        "half"
+                      ]
+                    },
+                    "visibility": {
+                      "description": "Mostrar o campo só quando as regras valem (US-479)",
+                      "type": "object",
+                      "properties": {
+                        "combinator": {
+                          "type": "string",
+                          "enum": [
+                            "and",
+                            "or"
+                          ]
+                        },
+                        "rules": {
+                          "type": "array",
+                          "minItems": 1,
+                          "maxItems": 10,
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "sourceId": {
+                                "description": "Campo de origem; tem de vir antes no formulário",
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "operator": {
+                                "type": "string",
+                                "enum": [
+                                  "equals",
+                                  "contains",
+                                  "filled",
+                                  "empty",
+                                  "gt",
+                                  "lt",
+                                  "in",
+                                  "not_in"
+                                ]
+                              },
+                              "value": {
+                                "description": "Texto, número ou data; lista de opções em «in» e «not_in»",
+                                "oneOf": [
+                                  {
+                                    "type": "string",
+                                    "maxLength": 500
+                                  },
+                                  {
+                                    "type": "array",
+                                    "maxItems": 200,
+                                    "items": {
+                                      "type": "string",
+                                      "maxLength": 500
+                                    }
+                                  }
+                                ],
+                                "nullable": true
+                              }
+                            },
+                            "required": [
+                              "sourceId",
+                              "operator",
+                              "value"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "combinator",
+                        "rules"
+                      ],
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "propertyId",
+                    "entityType",
+                    "label",
+                    "placeholder",
+                    "helpText",
+                    "required",
+                    "hidden",
+                    "urlParam",
+                    "width"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "heading"
+                      ]
+                    },
+                    "id": {
+                      "description": "Gerado pelo cliente; estável para as regras de exibição (US-479)",
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "text": {
+                      "type": "string",
+                      "maxLength": 200,
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "text"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "text"
+                      ]
+                    },
+                    "id": {
+                      "description": "Gerado pelo cliente; estável para as regras de exibição (US-479)",
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "text": {
+                      "type": "string",
+                      "maxLength": 5000,
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "text"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "image"
+                      ]
+                    },
+                    "id": {
+                      "description": "Gerado pelo cliente; estável para as regras de exibição (US-479)",
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "url": {
+                      "type": "string",
+                      "format": "uri",
+                      "maxLength": 2048
+                    },
+                    "alt": {
+                      "type": "string",
+                      "maxLength": 200,
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "url",
+                    "alt"
+                  ]
+                }
+              ]
+            }
+          },
+          "styles": {
+            "type": "object",
+            "properties": {
+              "layout": {
+                "type": "string",
+                "enum": [
+                  "one-column",
+                  "two-columns",
+                  "one-per-page"
+                ]
+              },
+              "theme": {
+                "type": "string",
+                "enum": [
+                  "light",
+                  "dark"
+                ],
+                "nullable": true
+              },
+              "primaryColor": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "nullable": true
+              },
+              "coverColor": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "nullable": true
+              },
+              "coverPositionY": {
+                "description": "Posição vertical (0–100) do object-position da capa",
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMinimum": false,
+                "maximum": 100,
+                "exclusiveMaximum": false,
+                "nullable": true
+              },
+              "backgroundColor": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "nullable": true
+              },
+              "backgroundImageUrl": {
+                "type": "string",
+                "format": "uri",
+                "maxLength": 2048,
+                "nullable": true
+              },
+              "coverImageUrl": {
+                "type": "string",
+                "format": "uri",
+                "maxLength": 2048,
+                "nullable": true
+              },
+              "logoUrl": {
+                "type": "string",
+                "format": "uri",
+                "maxLength": 2048,
+                "nullable": true
+              },
+              "logoEmoji": {
+                "description": "Avatar em emoji (um grafema); quando preenchido, o logo de imagem é ignorado",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 32,
+                "nullable": true
+              },
+              "backgroundMedia": {
+                "description": "Camada 1: mídia por cima da cor de fundo (substitui backgroundImageUrl)",
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "color",
+                      "gradient",
+                      "image"
+                    ]
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2048
+                  }
+                },
+                "required": [
+                  "kind",
+                  "value"
+                ],
+                "nullable": true
+              },
+              "backgroundPositionY": {
+                "description": "Posição vertical (0–100) da imagem de fundo",
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMinimum": false,
+                "maximum": 100,
+                "exclusiveMaximum": false,
+                "nullable": true
+              },
+              "headerCover": {
+                "description": "Camada 2: capa de header de ponta a ponta",
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "color",
+                      "gradient",
+                      "image"
+                    ]
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2048
+                  }
+                },
+                "required": [
+                  "kind",
+                  "value"
+                ],
+                "nullable": true
+              },
+              "headerPositionY": {
+                "description": "Posição vertical (0–100) da capa de header",
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMinimum": false,
+                "maximum": 100,
+                "exclusiveMaximum": false,
+                "nullable": true
+              },
+              "headerLogoUrl": {
+                "description": "Logo grande centralizado na capa de header",
+                "type": "string",
+                "format": "uri",
+                "maxLength": 2048,
+                "nullable": true
+              },
+              "cardCover": {
+                "description": "Camada 3: capa do cartão (substitui coverImageUrl/coverColor)",
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "color",
+                      "gradient",
+                      "image"
+                    ]
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2048
+                  }
+                },
+                "required": [
+                  "kind",
+                  "value"
+                ],
+                "nullable": true
+              },
+              "cardCoverPositionY": {
+                "description": "Posição vertical (0–100) da capa do cartão",
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMinimum": false,
+                "maximum": 100,
+                "exclusiveMaximum": false,
+                "nullable": true
+              },
+              "buttonColor": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "nullable": true
+              },
+              "buttonTextColor": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "nullable": true
+              },
+              "fieldAccentColor": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "nullable": true
+              },
+              "submitLabel": {
+                "description": "Texto do botão de envio; vazio usa «Enviar»",
+                "type": "string",
+                "maxLength": 60,
+                "nullable": true
+              }
+            }
+          },
+          "pages": {
+            "type": "object",
+            "properties": {
+              "start": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "title": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "nullable": true
+                  },
+                  "text": {
+                    "type": "string",
+                    "maxLength": 5000,
+                    "nullable": true
+                  },
+                  "buttonText": {
+                    "type": "string",
+                    "maxLength": 60,
+                    "nullable": true
+                  }
+                }
+              },
+              "thankYou": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "nullable": true
+                  },
+                  "text": {
+                    "type": "string",
+                    "maxLength": 5000,
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          },
+          "settings": {
+            "type": "object",
+            "properties": {
+              "pipelineId": {
+                "type": "string",
+                "format": "uuid",
+                "nullable": true
+              },
+              "pipelineStageId": {
+                "type": "string",
+                "format": "uuid",
+                "nullable": true
+              },
+              "redirectUrl": {
+                "description": "Após o envio: com URL redireciona; sem, mostra o agradecimento",
+                "type": "string",
+                "format": "uri",
+                "maxLength": 2048,
+                "nullable": true
+              },
+              "forwardTrackingParams": {
+                "description": "Repassa os parâmetros de rastreamento à URL do redirect",
+                "type": "boolean"
+              },
+              "termsUrl": {
+                "description": "Termos de uso e política de privacidade (link do aceite LGPD)",
+                "type": "string",
+                "format": "uri",
+                "maxLength": 2048,
+                "nullable": true
+              },
+              "updateFilledFields": {
+                "description": "Com ID na URL: sobrescreve campos que já têm valor",
+                "type": "boolean"
+              },
+              "updateAllFields": {
+                "description": "Cadastro: contato já existente tem todos os campos atualizados com o envio; desligado, só os vazios",
+                "type": "boolean"
+              },
+              "populateWithFilledData": {
+                "description": "Com ID na URL: mostra os valores atuais nos campos",
+                "type": "boolean"
+              },
+              "opportunityNameTemplate": {
+                "description": "Nome da oportunidade: texto com {{form_name}}, {{contact_name}}, {{contact_email}}, {{contact_phone}} e {{field:<id de campo do contato>}}; vazio = «<formulário> - <contato>»",
+                "type": "string",
+                "maxLength": 200,
+                "nullable": true
+              },
+              "updateOpportunityName": {
+                "description": "Captação: «Modificar» troca o nome inteiro da oportunidade pelo modelo a cada envio",
+                "type": "boolean"
+              },
+              "postSubmitActions": {
+                "type": "array",
+                "maxItems": 10,
+                "items": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "set_owner"
+                          ]
+                        },
+                        "userId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "nullable": true
+                        },
+                        "entity": {
+                          "description": "Captação: a entidade que troca de responsável; sem entidade (Cadastro) vale para contato e oportunidade",
+                          "type": "string",
+                          "enum": [
+                            "opportunity",
+                            "contact",
+                            "company"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "userId"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "add_tags"
+                          ]
+                        },
+                        "tagIds": {
+                          "type": "array",
+                          "minItems": 1,
+                          "maxItems": 50,
+                          "items": {
+                            "type": "string",
+                            "format": "uuid"
+                          }
+                        },
+                        "entity": {
+                          "type": "string",
+                          "enum": [
+                            "opportunity",
+                            "contact",
+                            "company"
+                          ],
+                          "default": "opportunity"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "tagIds"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "emailNotification": {
+                "description": "E-mail a cada envio (US-501): responsável da oportunidade e extras; sem a chave, ligado",
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "extraEmails": {
+                    "type": "array",
+                    "maxItems": 10,
+                    "items": {
+                      "type": "string",
+                      "format": "email"
+                    }
+                  }
+                },
+                "required": [
+                  "enabled",
+                  "extraEmails"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "DepositCalendarAppointmentDto": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "paid",
+              "waived",
+              "refunded"
+            ]
+          },
+          "amountCents": {
+            "type": "integer",
+            "minimum": 0,
+            "exclusiveMinimum": false
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "pix",
+              "cash",
+              "card",
+              "transfer",
+              "other"
+            ]
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "version": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "action",
+          "version"
+        ]
+      },
+      "CalendarNextAvailableDto": {
+        "type": "object",
+        "properties": {
+          "bookableId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "morning",
+              "afternoon",
+              "evening",
+              "any"
+            ]
+          },
+          "maxAdvanceDays": {
+            "type": "integer"
+          },
+          "searchedUntil": {
+            "description": "Fim da busca (ISO 8601): agora + maxAdvanceDays",
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startsAt": {
+                  "type": "string"
+                },
+                "endsAt": {
+                  "type": "string"
+                },
+                "unitId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "professionalResourceId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "nullable": true
+                },
+                "professionalName": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "roomResourceId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "nullable": true
+                },
+                "roomName": {
+                  "type": "string",
+                  "nullable": true
+                }
+              },
+              "required": [
+                "startsAt",
+                "endsAt",
+                "unitId",
+                "professionalResourceId",
+                "professionalName",
+                "roomResourceId",
+                "roomName"
+              ]
+            }
+          }
+        },
+        "required": [
+          "bookableId",
+          "period",
+          "maxAdvanceDays",
+          "searchedUntil",
+          "items"
+        ]
+      },
+      "CalendarBookableDto": {
+        "type": "object",
+        "properties": {
+          "productRef": {
+            "description": "Produto do CRM que dá nome e preço ao serviço; null em serviço avulso",
+            "type": "string",
+            "nullable": true
+          },
+          "depositType": {
+            "description": "sem sinal, valor fixo ou % do preço do produto",
+            "type": "string",
+            "enum": [
+              "none",
+              "fixed",
+              "percent"
+            ]
+          },
+          "depositValue": {
+            "description": "centavos quando fixed; 1..100 quando percent",
+            "type": "integer",
+            "nullable": true
+          },
+          "depositRetainOnNoShow": {
+            "description": "retém o sinal em falta (padrão true)",
+            "type": "boolean"
+          },
+          "minProfessionals": {
+            "description": "mínimo de profissionais no atendimento (padrão 1)",
+            "type": "integer",
+            "minimum": 1,
+            "exclusiveMinimum": false
+          },
+          "maxProfessionals": {
+            "description": "máximo de profissionais (padrão = mínimo)",
+            "type": "integer",
+            "minimum": 1,
+            "exclusiveMinimum": false
+          }
+        }
+      },
+      "CalendarPassthroughDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "ConfirmationCalendarAppointmentDto": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "confirmed",
+              "declined"
+            ]
+          },
+          "version": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "confirmation",
+          "version"
+        ]
+      },
+      "WebFormAnalyticsDto": {
+        "type": "object",
+        "properties": {
+          "views": {
+            "description": "Aberturas da página pública, uma por sessão do navegador",
+            "type": "integer"
+          },
+          "submissions": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "integer"
+              },
+              "create": {
+                "type": "integer"
+              },
+              "update": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "total",
+              "create",
+              "update"
+            ]
+          },
+          "conversionRate": {
+            "description": "Envios ÷ visualizações; null sem visualização no período",
+            "type": "number",
+            "nullable": true
+          },
+          "daily": {
+            "description": "Um item por dia do período, inclusive os sem movimento",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "date": {
+                  "description": "Dia em BRT (AAAA-MM-DD)",
+                  "type": "string"
+                },
+                "views": {
+                  "type": "integer"
+                },
+                "submissions": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "date",
+                "views",
+                "submissions"
+              ]
+            }
+          },
+          "utmSources": {
+            "description": "Top 10 por envios",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string"
+                },
+                "count": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "value",
+                "count"
+              ]
+            }
+          },
+          "utmCampaigns": {
+            "description": "Top 10 por envios",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string"
+                },
+                "count": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "value",
+                "count"
+              ]
+            }
+          }
+        },
+        "required": [
+          "views",
+          "submissions",
+          "conversionRate",
+          "daily",
+          "utmSources",
+          "utmCampaigns"
+        ]
+      },
+      "AttendanceCalendarAppointmentDto": {
+        "type": "object",
+        "properties": {
+          "attendance": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "arrived",
+              "in_service",
+              "attended",
+              "no_show"
+            ]
+          },
+          "version": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "attendance",
+          "version"
+        ]
+      },
+      "OpportunityWebFormsDto": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "publicId": {
+                  "type": "string"
+                },
+                "lastSubmission": {
+                  "description": "Último envio ligado a esta oportunidade",
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "createdAt": {}
+                  },
+                  "required": [
+                    "id",
+                    "createdAt"
+                  ],
+                  "nullable": true
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "publicId",
+                "lastSubmission"
+              ]
+            }
+          }
+        },
+        "required": [
+          "rows"
+        ]
+      },
+      "ReleaseCalendarWaitlistEntryDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version"
+        ]
+      },
+      "RemoveCalendarWaitlistEntryDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "version",
+          "reason"
+        ]
+      },
+      "CalendarSettingsDto": {
+        "type": "object",
+        "properties": {
+          "allowNonWorkingDayBooking": {
+            "type": "boolean"
+          },
+          "reminderLeadsMinutes": {
+            "description": "antecedências do lembrete em minutos (1 a 3, sem repetição; padrão [1440])",
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 3,
+            "items": {
+              "type": "integer",
+              "minimum": 1,
+              "exclusiveMinimum": false,
+              "maximum": 10080,
+              "exclusiveMaximum": false
+            }
+          },
+          "reminderLeadMinutes": {
+            "description": "Legado: uma antecedência só (vira [n] no motor)",
+            "type": "integer",
+            "minimum": 1,
+            "exclusiveMinimum": false,
+            "maximum": 10080,
+            "exclusiveMaximum": false
+          },
+          "depositPixKey": {
+            "description": "chave Pix da clínica para o sinal",
+            "type": "string",
+            "maxLength": 140,
+            "nullable": true
+          },
+          "depositPixHolder": {
+            "description": "nome do favorecido do Pix",
+            "type": "string",
+            "maxLength": 140,
+            "nullable": true
+          },
+          "depositDueHoursBefore": {
+            "description": "sinal vence N horas antes do início (padrão 24; nunca antes de 2 h depois de agendar)",
+            "type": "integer",
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "maximum": 168,
+            "exclusiveMaximum": false
+          },
+          "cancellationPolicyHours": {
+            "description": "cancelar com N horas ou mais de antecedência devolve o sinal; menos retém (padrão 24)",
+            "type": "integer",
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "maximum": 168,
+            "exclusiveMaximum": false
+          }
+        }
+      },
+      "WebFormLinkDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "description": "Link público com o token (`?id=`)",
+            "type": "string"
+          },
+          "expiresAt": {
+            "description": "Validade do link (ISO 8601)",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "expiresAt"
+        ]
+      },
+      "CancelCalendarAppointmentDto": {
+        "type": "object",
+        "properties": {
+          "cancellationCode": {
+            "type": "string",
+            "minLength": 1
+          },
+          "cancellationNote": {
+            "type": "string",
+            "minLength": 1
+          },
+          "version": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "cancellationCode",
+          "version"
         ]
       }
     }
