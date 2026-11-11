@@ -7980,7 +7980,7 @@
             "name": "includeReminders",
             "required": false,
             "in": "query",
-            "description": "inclui `reminders[]` em cada item (uma leitura no motor por item; o detalhe já traz)",
+            "description": "inclui `reminders[]` em cada item (uma consulta extra por item; o detalhe já traz)",
             "schema": {
               "enum": [
                 "true",
@@ -8060,7 +8060,7 @@
             "name": "contactId",
             "required": false,
             "in": "query",
-            "description": "Apelido de contactRef (tela do contato)",
+            "description": "mesmo que `contactRef`",
             "schema": {
               "format": "uuid",
               "type": "string"
@@ -33749,14 +33749,14 @@
             }
           },
           "tracking": {
-            "description": "Parâmetros de rastreamento recebidos (US-483)",
+            "description": "Parâmetros de rastreamento recebidos",
             "type": "object",
             "additionalProperties": {
               "type": "string"
             }
           },
           "actionErrors": {
-            "description": "Ações após o envio que falharam (US-488)",
+            "description": "Ações após o envio que falharam",
             "type": "array",
             "items": {
               "type": "string"
@@ -33959,7 +33959,7 @@
                       ]
                     },
                     "id": {
-                      "description": "Gerado pelo cliente; estável para as regras de exibição (US-479)",
+                      "description": "Gerado pelo cliente; estável para as regras de exibição",
                       "type": "string",
                       "format": "uuid"
                     },
@@ -34011,7 +34011,7 @@
                       ]
                     },
                     "visibility": {
-                      "description": "Mostrar o campo só quando as regras valem (US-479)",
+                      "description": "Mostrar o campo só quando as regras valem",
                       "type": "object",
                       "properties": {
                         "combinator": {
@@ -34109,7 +34109,7 @@
                       ]
                     },
                     "id": {
-                      "description": "Gerado pelo cliente; estável para as regras de exibição (US-479)",
+                      "description": "Gerado pelo cliente; estável para as regras de exibição",
                       "type": "string",
                       "format": "uuid"
                     },
@@ -34135,7 +34135,7 @@
                       ]
                     },
                     "id": {
-                      "description": "Gerado pelo cliente; estável para as regras de exibição (US-479)",
+                      "description": "Gerado pelo cliente; estável para as regras de exibição",
                       "type": "string",
                       "format": "uuid"
                     },
@@ -34161,7 +34161,7 @@
                       ]
                     },
                     "id": {
-                      "description": "Gerado pelo cliente; estável para as regras de exibição (US-479)",
+                      "description": "Gerado pelo cliente; estável para as regras de exibição",
                       "type": "string",
                       "format": "uuid"
                     },
@@ -34550,7 +34550,7 @@
                 }
               },
               "emailNotification": {
-                "description": "E-mail a cada envio (US-501): responsável da oportunidade e extras; sem a chave, ligado",
+                "description": "E-mail a cada envio: responsável da oportunidade e extras; sem a chave, ligado",
                 "type": "object",
                 "properties": {
                   "enabled": {
@@ -35012,7 +35012,7 @@
                       ]
                     },
                     "id": {
-                      "description": "Gerado pelo cliente; estável para as regras de exibição (US-479)",
+                      "description": "Gerado pelo cliente; estável para as regras de exibição",
                       "type": "string",
                       "format": "uuid"
                     },
@@ -35064,7 +35064,7 @@
                       ]
                     },
                     "visibility": {
-                      "description": "Mostrar o campo só quando as regras valem (US-479)",
+                      "description": "Mostrar o campo só quando as regras valem",
                       "type": "object",
                       "properties": {
                         "combinator": {
@@ -35157,7 +35157,7 @@
                       ]
                     },
                     "id": {
-                      "description": "Gerado pelo cliente; estável para as regras de exibição (US-479)",
+                      "description": "Gerado pelo cliente; estável para as regras de exibição",
                       "type": "string",
                       "format": "uuid"
                     },
@@ -35183,7 +35183,7 @@
                       ]
                     },
                     "id": {
-                      "description": "Gerado pelo cliente; estável para as regras de exibição (US-479)",
+                      "description": "Gerado pelo cliente; estável para as regras de exibição",
                       "type": "string",
                       "format": "uuid"
                     },
@@ -35209,7 +35209,7 @@
                       ]
                     },
                     "id": {
-                      "description": "Gerado pelo cliente; estável para as regras de exibição (US-479)",
+                      "description": "Gerado pelo cliente; estável para as regras de exibição",
                       "type": "string",
                       "format": "uuid"
                     },
@@ -35598,7 +35598,7 @@
                 }
               },
               "emailNotification": {
-                "description": "E-mail a cada envio (US-501): responsável da oportunidade e extras; sem a chave, ligado",
+                "description": "E-mail a cada envio: responsável da oportunidade e extras; sem a chave, ligado",
                 "type": "object",
                 "properties": {
                   "enabled": {
@@ -35762,7 +35762,7 @@
                       ]
                     },
                     "id": {
-                      "description": "Gerado pelo cliente; estável para as regras de exibição (US-479)",
+                      "description": "Gerado pelo cliente; estável para as regras de exibição",
                       "type": "string",
                       "format": "uuid"
                     },
@@ -35814,7 +35814,7 @@
                       ]
                     },
                     "visibility": {
-                      "description": "Mostrar o campo só quando as regras valem (US-479)",
+                      "description": "Mostrar o campo só quando as regras valem",
                       "type": "object",
                       "properties": {
                         "combinator": {
@@ -35907,7 +35907,7 @@
                       ]
                     },
                     "id": {
-                      "description": "Gerado pelo cliente; estável para as regras de exibição (US-479)",
+                      "description": "Gerado pelo cliente; estável para as regras de exibição",
                       "type": "string",
                       "format": "uuid"
                     },
@@ -35933,7 +35933,7 @@
                       ]
                     },
                     "id": {
-                      "description": "Gerado pelo cliente; estável para as regras de exibição (US-479)",
+                      "description": "Gerado pelo cliente; estável para as regras de exibição",
                       "type": "string",
                       "format": "uuid"
                     },
@@ -35959,7 +35959,7 @@
                       ]
                     },
                     "id": {
-                      "description": "Gerado pelo cliente; estável para as regras de exibição (US-479)",
+                      "description": "Gerado pelo cliente; estável para as regras de exibição",
                       "type": "string",
                       "format": "uuid"
                     },
@@ -36348,7 +36348,7 @@
                 }
               },
               "emailNotification": {
-                "description": "E-mail a cada envio (US-501): responsável da oportunidade e extras; sem a chave, ligado",
+                "description": "E-mail a cada envio: responsável da oportunidade e extras; sem a chave, ligado",
                 "type": "object",
                 "properties": {
                   "enabled": {
@@ -36777,7 +36777,7 @@
             }
           },
           "reminderLeadMinutes": {
-            "description": "Legado: uma antecedência só (vira [n] no motor)",
+            "description": "Legado: uma antecedência só",
             "type": "integer",
             "minimum": 1,
             "exclusiveMinimum": false,

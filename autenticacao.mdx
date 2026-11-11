@@ -60,8 +60,6 @@ São 28 escopos ao todo. `tenant_user:write` e `calendar_config:write` não exis
 
 ### Formulários
 
-<Warning>`web_form:read` dá acesso aos envios dos formulários, incluindo os dados de contato que a pessoa preencheu (nome, telefone, e-mail e os demais campos). Esse acesso não depende de `contact:read`. Conceda esse escopo só a integrações que podem tratar esses dados pessoais.</Warning>
-
 - `POST /web-forms/{id}/links` gera um link atrelado a uma oportunidade e exige `web_form:write` **e** `opportunity:write`. Sem `opportunity:write`, responde `403`.
 - `property:read` e `property:write` não dão acesso a Formulários.
 
