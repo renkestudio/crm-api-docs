@@ -8073,7 +8073,8 @@
             "schema": {
               "format": "uuid",
               "type": "string"
-            }
+            },
+            "description": "Id da oportunidade. Traz os agendamentos dela."
           },
           {
             "name": "contactRef",
@@ -8082,7 +8083,8 @@
             "schema": {
               "format": "uuid",
               "type": "string"
-            }
+            },
+            "description": "Id do contato. Traz os agendamentos dele."
           },
           {
             "name": "needsReallocation",
@@ -8147,14 +8149,103 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarPassthroughDto"
+                },
+                "example": {
+                  "items": [
+                    {
+                      "id": "eeeeeeee-eeee-4eee-8eee-000000000001",
+                      "status": "scheduled",
+                      "attendance": "pending",
+                      "confirmation": "confirmed",
+                      "confirmationSource": "staff",
+                      "confirmedAt": "2026-12-01T12:00:00.000Z",
+                      "arrivedAt": null,
+                      "startedAt": null,
+                      "finishedAt": null,
+                      "cancellationCode": null,
+                      "startsAt": "2026-12-02T13:00:00.000Z",
+                      "endsAt": "2026-12-02T13:45:00.000Z",
+                      "unitId": "eeeeeeee-eeee-4eee-8eee-000000000101",
+                      "segments": [
+                        {
+                          "position": 1,
+                          "startsAt": "2026-12-02T13:00:00.000Z",
+                          "endsAt": "2026-12-02T13:45:00.000Z",
+                          "requiresProfessional": true
+                        }
+                      ],
+                      "allocations": [
+                        {
+                          "resourceId": "eeeeeeee-eeee-4eee-8eee-000000000501",
+                          "kind": "professional",
+                          "forced": false
+                        },
+                        {
+                          "resourceId": "eeeeeeee-eeee-4eee-8eee-000000000502",
+                          "kind": "room",
+                          "forced": false
+                        }
+                      ],
+                      "generation": 1,
+                      "version": 3,
+                      "bookableId": "eeeeeeee-eeee-4eee-8eee-000000000301",
+                      "calendarId": "eeeeeeee-eeee-4eee-8eee-000000000201",
+                      "contactRef": "eeeeeeee-eeee-4eee-8eee-000000000601",
+                      "opportunityRef": "eeeeeeee-eeee-4eee-8eee-000000000701",
+                      "visibility": "shared",
+                      "needsReallocation": false,
+                      "bypassedRestrictions": false,
+                      "overrideReason": null,
+                      "depositStatus": "none",
+                      "depositAmountCents": null,
+                      "depositDueAt": null,
+                      "depositOverdue": false,
+                      "depositPaidCents": null,
+                      "depositMethod": null,
+                      "depositPaidAt": null,
+                      "depositNote": null,
+                      "depositRecordedByRef": null,
+                      "depositRecordedAt": null,
+                      "productRef": "eeeeeeee-eeee-4eee-8eee-000000000401",
+                      "returnAfterDays": 30,
+                      "professionalUserRef": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                      "productName": "consulta-avaliacao",
+                      "productLabel": "Consulta de avaliação",
+                      "productPrice": 180,
+                      "contactName": "Paciente Exemplo",
+                      "contactPhone": "+5500000000000",
+                      "professionalName": "Profissional Exemplo",
+                      "professionalNames": [
+                        "Profissional Exemplo"
+                      ],
+                      "roomName": "Sala 1",
+                      "missingReminderChannel": false,
+                      "receptionNote": "Trazer exames anteriores",
+                      "hasReceptionNote": true
+                    }
+                  ],
+                  "total": 1,
+                  "page": 1,
+                  "pageSize": 20,
+                  "serverNow": "2026-11-26T14:03:11.123Z",
+                  "warnings": []
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -8167,11 +8258,21 @@
         "tags": [
           "Agenda"
         ],
-        "description": "Escopo: `appointment:read`.\n\nSó responde nos tenants com o módulo Agenda ligado."
+        "description": "Escopo: `appointment:read`.\n\nSó responde nos tenants com o módulo Agenda ligado.\n\nPara ver os agendamentos de uma oportunidade, filtre por `opportunityRef`:\n\n```\nGET /v1/calendar/appointments?opportunityRef=<id da oportunidade>\n```\n\nA resposta é paginada (`items`, `total`, `page`, `pageSize`; padrão de 20 por página, até 100). Agendamento `private` de outra pessoa volta mascarado: só `id`, horário, profissional e `\"busy\": true`."
       },
       "post": {
         "operationId": "createCalendarAppointment",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Identificador único da tentativa (por exemplo, um UUID novo por agendamento). Repetir a mesma chave com o mesmo corpo não cria outro agendamento.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -8183,25 +8284,157 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          },
           "201": {
-            "description": "",
+            "description": "Criado ou atualizado",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarAppointmentResponseDto"
+                },
+                "example": {
+                  "id": "eeeeeeee-eeee-4eee-8eee-000000000001",
+                  "status": "scheduled",
+                  "attendance": "pending",
+                  "confirmation": "pending",
+                  "confirmationSource": null,
+                  "confirmedAt": null,
+                  "arrivedAt": null,
+                  "startedAt": null,
+                  "finishedAt": null,
+                  "cancellationCode": null,
+                  "startsAt": "2026-12-02T13:00:00.000Z",
+                  "endsAt": "2026-12-02T13:45:00.000Z",
+                  "unitId": "eeeeeeee-eeee-4eee-8eee-000000000101",
+                  "segments": [
+                    {
+                      "position": 1,
+                      "startsAt": "2026-12-02T13:00:00.000Z",
+                      "endsAt": "2026-12-02T13:45:00.000Z",
+                      "requiresProfessional": true
+                    }
+                  ],
+                  "allocations": [
+                    {
+                      "resourceId": "eeeeeeee-eeee-4eee-8eee-000000000501",
+                      "kind": "professional",
+                      "forced": false
+                    },
+                    {
+                      "resourceId": "eeeeeeee-eeee-4eee-8eee-000000000502",
+                      "kind": "room",
+                      "forced": false
+                    }
+                  ],
+                  "generation": 1,
+                  "version": 1,
+                  "bookableId": "eeeeeeee-eeee-4eee-8eee-000000000301",
+                  "calendarId": "eeeeeeee-eeee-4eee-8eee-000000000201",
+                  "contactRef": "eeeeeeee-eeee-4eee-8eee-000000000601",
+                  "opportunityRef": "eeeeeeee-eeee-4eee-8eee-000000000701",
+                  "visibility": "shared",
+                  "needsReallocation": false,
+                  "bypassedRestrictions": false,
+                  "overrideReason": null,
+                  "depositStatus": "none",
+                  "depositAmountCents": null,
+                  "depositDueAt": null,
+                  "depositOverdue": false,
+                  "depositPaidCents": null,
+                  "depositMethod": null,
+                  "depositPaidAt": null,
+                  "depositNote": null,
+                  "depositRecordedByRef": null,
+                  "depositRecordedAt": null,
+                  "productRef": "eeeeeeee-eeee-4eee-8eee-000000000401",
+                  "returnAfterDays": 30,
+                  "professionalUserRef": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                  "productName": "consulta-avaliacao",
+                  "productLabel": "Consulta de avaliação",
+                  "productPrice": 180,
+                  "contactName": "Paciente Exemplo",
+                  "contactPhone": "+5500000000000",
+                  "professionalName": "Profissional Exemplo",
+                  "professionalNames": [
+                    "Profissional Exemplo"
+                  ],
+                  "roomName": "Sala 1",
+                  "missingReminderChannel": false,
+                  "receptionNote": null,
+                  "hasReceptionNote": false,
+                  "warnings": []
                 }
               }
             }
+          },
+          "400": {
+            "description": "Corpo inválido ou header `Idempotency-Key` ausente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, quando existe."
+                    }
+                  }
+                },
+                "examples": {
+                  "semIdempotencia": {
+                    "summary": "Sem Idempotency-Key",
+                    "value": {
+                      "code": "IDEMPOTENCY_KEY_REQUIRED",
+                      "message": "Idempotency-Key é obrigatória"
+                    }
+                  },
+                  "validacao": {
+                    "summary": "Campo obrigatório ausente",
+                    "value": {
+                      "statusCode": 400,
+                      "message": "Dados inválidos na requisição",
+                      "errors": [
+                        {
+                          "code": "invalid_type",
+                          "expected": "string",
+                          "received": "undefined",
+                          "path": [
+                            "startsAt"
+                          ],
+                          "message": "Required"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/AgendaNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/AgendaConflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/AgendaUnprocessable"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -8232,14 +8465,108 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarPassthroughDto"
+                },
+                "example": {
+                  "id": "eeeeeeee-eeee-4eee-8eee-000000000001",
+                  "status": "scheduled",
+                  "attendance": "pending",
+                  "confirmation": "confirmed",
+                  "confirmationSource": "staff",
+                  "confirmedAt": "2026-12-01T12:00:00.000Z",
+                  "arrivedAt": null,
+                  "startedAt": null,
+                  "finishedAt": null,
+                  "cancellationCode": null,
+                  "startsAt": "2026-12-02T13:00:00.000Z",
+                  "endsAt": "2026-12-02T13:45:00.000Z",
+                  "unitId": "eeeeeeee-eeee-4eee-8eee-000000000101",
+                  "segments": [
+                    {
+                      "position": 1,
+                      "startsAt": "2026-12-02T13:00:00.000Z",
+                      "endsAt": "2026-12-02T13:45:00.000Z",
+                      "requiresProfessional": true
+                    }
+                  ],
+                  "allocations": [
+                    {
+                      "resourceId": "eeeeeeee-eeee-4eee-8eee-000000000501",
+                      "kind": "professional",
+                      "forced": false
+                    },
+                    {
+                      "resourceId": "eeeeeeee-eeee-4eee-8eee-000000000502",
+                      "kind": "room",
+                      "forced": false
+                    }
+                  ],
+                  "generation": 1,
+                  "version": 3,
+                  "bookableId": "eeeeeeee-eeee-4eee-8eee-000000000301",
+                  "calendarId": "eeeeeeee-eeee-4eee-8eee-000000000201",
+                  "contactRef": "eeeeeeee-eeee-4eee-8eee-000000000601",
+                  "opportunityRef": "eeeeeeee-eeee-4eee-8eee-000000000701",
+                  "visibility": "shared",
+                  "needsReallocation": false,
+                  "bypassedRestrictions": false,
+                  "overrideReason": null,
+                  "depositStatus": "none",
+                  "depositAmountCents": null,
+                  "depositDueAt": null,
+                  "depositOverdue": false,
+                  "depositPaidCents": null,
+                  "depositMethod": null,
+                  "depositPaidAt": null,
+                  "depositNote": null,
+                  "depositRecordedByRef": null,
+                  "depositRecordedAt": null,
+                  "productRef": "eeeeeeee-eeee-4eee-8eee-000000000401",
+                  "returnAfterDays": 30,
+                  "professionalUserRef": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                  "productName": "consulta-avaliacao",
+                  "productLabel": "Consulta de avaliação",
+                  "productPrice": 180,
+                  "contactName": "Paciente Exemplo",
+                  "contactPhone": "+5500000000000",
+                  "professionalName": "Profissional Exemplo",
+                  "professionalNames": [
+                    "Profissional Exemplo"
+                  ],
+                  "roomName": "Sala 1",
+                  "missingReminderChannel": false,
+                  "receptionNote": "Trazer exames anteriores",
+                  "hasReceptionNote": true,
+                  "reminders": [
+                    {
+                      "generation": 1,
+                      "leadMinutes": 1440,
+                      "current": true,
+                      "status": "scheduled",
+                      "channel": "whatsapp",
+                      "scheduledFor": "2026-12-01T13:00:00.000Z",
+                      "error": null
+                    }
+                  ]
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/AgendaNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -8279,15 +8606,107 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "",
+          "201": {
+            "description": "Criado ou atualizado",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarPassthroughDto"
+                },
+                "example": {
+                  "id": "eeeeeeee-eeee-4eee-8eee-000000000001",
+                  "status": "scheduled",
+                  "attendance": "arrived",
+                  "confirmation": "confirmed",
+                  "confirmationSource": "staff",
+                  "confirmedAt": "2026-12-01T12:00:00.000Z",
+                  "arrivedAt": "2026-12-02T12:55:00.000Z",
+                  "startedAt": null,
+                  "finishedAt": null,
+                  "cancellationCode": null,
+                  "startsAt": "2026-12-02T13:00:00.000Z",
+                  "endsAt": "2026-12-02T13:45:00.000Z",
+                  "unitId": "eeeeeeee-eeee-4eee-8eee-000000000101",
+                  "segments": [
+                    {
+                      "position": 1,
+                      "startsAt": "2026-12-02T13:00:00.000Z",
+                      "endsAt": "2026-12-02T13:45:00.000Z",
+                      "requiresProfessional": true
+                    }
+                  ],
+                  "allocations": [
+                    {
+                      "resourceId": "eeeeeeee-eeee-4eee-8eee-000000000501",
+                      "kind": "professional",
+                      "forced": false
+                    },
+                    {
+                      "resourceId": "eeeeeeee-eeee-4eee-8eee-000000000502",
+                      "kind": "room",
+                      "forced": false
+                    }
+                  ],
+                  "generation": 1,
+                  "version": 4,
+                  "bookableId": "eeeeeeee-eeee-4eee-8eee-000000000301",
+                  "calendarId": "eeeeeeee-eeee-4eee-8eee-000000000201",
+                  "contactRef": "eeeeeeee-eeee-4eee-8eee-000000000601",
+                  "opportunityRef": "eeeeeeee-eeee-4eee-8eee-000000000701",
+                  "visibility": "shared",
+                  "needsReallocation": false,
+                  "bypassedRestrictions": false,
+                  "overrideReason": null,
+                  "depositStatus": "none",
+                  "depositAmountCents": null,
+                  "depositDueAt": null,
+                  "depositOverdue": false,
+                  "depositPaidCents": null,
+                  "depositMethod": null,
+                  "depositPaidAt": null,
+                  "depositNote": null,
+                  "depositRecordedByRef": null,
+                  "depositRecordedAt": null,
+                  "productRef": "eeeeeeee-eeee-4eee-8eee-000000000401",
+                  "returnAfterDays": 30,
+                  "professionalUserRef": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                  "productName": "consulta-avaliacao",
+                  "productLabel": "Consulta de avaliação",
+                  "productPrice": 180,
+                  "contactName": "Paciente Exemplo",
+                  "contactPhone": "+5500000000000",
+                  "professionalName": "Profissional Exemplo",
+                  "professionalNames": [
+                    "Profissional Exemplo"
+                  ],
+                  "roomName": "Sala 1",
+                  "missingReminderChannel": false,
+                  "receptionNote": "Trazer exames anteriores",
+                  "hasReceptionNote": true
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/AgendaNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/AgendaConflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/AgendaUnprocessable"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -8327,15 +8746,107 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "",
+          "201": {
+            "description": "Criado ou atualizado",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarPassthroughDto"
+                },
+                "example": {
+                  "id": "eeeeeeee-eeee-4eee-8eee-000000000001",
+                  "status": "cancelled",
+                  "attendance": "pending",
+                  "confirmation": "confirmed",
+                  "confirmationSource": "staff",
+                  "confirmedAt": "2026-12-01T12:00:00.000Z",
+                  "arrivedAt": null,
+                  "startedAt": null,
+                  "finishedAt": null,
+                  "cancellationCode": "outro",
+                  "startsAt": "2026-12-02T13:00:00.000Z",
+                  "endsAt": "2026-12-02T13:45:00.000Z",
+                  "unitId": "eeeeeeee-eeee-4eee-8eee-000000000101",
+                  "segments": [
+                    {
+                      "position": 1,
+                      "startsAt": "2026-12-02T13:00:00.000Z",
+                      "endsAt": "2026-12-02T13:45:00.000Z",
+                      "requiresProfessional": true
+                    }
+                  ],
+                  "allocations": [
+                    {
+                      "resourceId": "eeeeeeee-eeee-4eee-8eee-000000000501",
+                      "kind": "professional",
+                      "forced": false
+                    },
+                    {
+                      "resourceId": "eeeeeeee-eeee-4eee-8eee-000000000502",
+                      "kind": "room",
+                      "forced": false
+                    }
+                  ],
+                  "generation": 1,
+                  "version": 4,
+                  "bookableId": "eeeeeeee-eeee-4eee-8eee-000000000301",
+                  "calendarId": "eeeeeeee-eeee-4eee-8eee-000000000201",
+                  "contactRef": "eeeeeeee-eeee-4eee-8eee-000000000601",
+                  "opportunityRef": "eeeeeeee-eeee-4eee-8eee-000000000701",
+                  "visibility": "shared",
+                  "needsReallocation": false,
+                  "bypassedRestrictions": false,
+                  "overrideReason": null,
+                  "depositStatus": "none",
+                  "depositAmountCents": null,
+                  "depositDueAt": null,
+                  "depositOverdue": false,
+                  "depositPaidCents": null,
+                  "depositMethod": null,
+                  "depositPaidAt": null,
+                  "depositNote": null,
+                  "depositRecordedByRef": null,
+                  "depositRecordedAt": null,
+                  "productRef": "eeeeeeee-eeee-4eee-8eee-000000000401",
+                  "returnAfterDays": 30,
+                  "professionalUserRef": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                  "productName": "consulta-avaliacao",
+                  "productLabel": "Consulta de avaliação",
+                  "productPrice": 180,
+                  "contactName": "Paciente Exemplo",
+                  "contactPhone": "+5500000000000",
+                  "professionalName": "Profissional Exemplo",
+                  "professionalNames": [
+                    "Profissional Exemplo"
+                  ],
+                  "roomName": "Sala 1",
+                  "missingReminderChannel": false,
+                  "receptionNote": null,
+                  "hasReceptionNote": false
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/AgendaNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/AgendaConflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/AgendaUnprocessable"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -8375,15 +8886,107 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "",
+          "201": {
+            "description": "Criado ou atualizado",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarPassthroughDto"
+                },
+                "example": {
+                  "id": "eeeeeeee-eeee-4eee-8eee-000000000001",
+                  "status": "scheduled",
+                  "attendance": "pending",
+                  "confirmation": "confirmed",
+                  "confirmationSource": "staff",
+                  "confirmedAt": "2026-12-01T12:00:00.000Z",
+                  "arrivedAt": null,
+                  "startedAt": null,
+                  "finishedAt": null,
+                  "cancellationCode": null,
+                  "startsAt": "2026-12-02T13:00:00.000Z",
+                  "endsAt": "2026-12-02T13:45:00.000Z",
+                  "unitId": "eeeeeeee-eeee-4eee-8eee-000000000101",
+                  "segments": [
+                    {
+                      "position": 1,
+                      "startsAt": "2026-12-02T13:00:00.000Z",
+                      "endsAt": "2026-12-02T13:45:00.000Z",
+                      "requiresProfessional": true
+                    }
+                  ],
+                  "allocations": [
+                    {
+                      "resourceId": "eeeeeeee-eeee-4eee-8eee-000000000501",
+                      "kind": "professional",
+                      "forced": false
+                    },
+                    {
+                      "resourceId": "eeeeeeee-eeee-4eee-8eee-000000000502",
+                      "kind": "room",
+                      "forced": false
+                    }
+                  ],
+                  "generation": 1,
+                  "version": 4,
+                  "bookableId": "eeeeeeee-eeee-4eee-8eee-000000000301",
+                  "calendarId": "eeeeeeee-eeee-4eee-8eee-000000000201",
+                  "contactRef": "eeeeeeee-eeee-4eee-8eee-000000000601",
+                  "opportunityRef": "eeeeeeee-eeee-4eee-8eee-000000000701",
+                  "visibility": "shared",
+                  "needsReallocation": false,
+                  "bypassedRestrictions": false,
+                  "overrideReason": null,
+                  "depositStatus": "none",
+                  "depositAmountCents": null,
+                  "depositDueAt": null,
+                  "depositOverdue": false,
+                  "depositPaidCents": null,
+                  "depositMethod": null,
+                  "depositPaidAt": null,
+                  "depositNote": null,
+                  "depositRecordedByRef": null,
+                  "depositRecordedAt": null,
+                  "productRef": "eeeeeeee-eeee-4eee-8eee-000000000401",
+                  "returnAfterDays": 30,
+                  "professionalUserRef": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                  "productName": "consulta-avaliacao",
+                  "productLabel": "Consulta de avaliação",
+                  "productPrice": 180,
+                  "contactName": "Paciente Exemplo",
+                  "contactPhone": "+5500000000000",
+                  "professionalName": "Profissional Exemplo",
+                  "professionalNames": [
+                    "Profissional Exemplo"
+                  ],
+                  "roomName": "Sala 1",
+                  "missingReminderChannel": false,
+                  "receptionNote": "Trazer exames anteriores",
+                  "hasReceptionNote": true
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/AgendaNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/AgendaConflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/AgendaUnprocessable"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -8423,15 +9026,107 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "",
+          "201": {
+            "description": "Criado ou atualizado",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarAppointmentResponseDto"
+                },
+                "example": {
+                  "id": "eeeeeeee-eeee-4eee-8eee-000000000001",
+                  "status": "scheduled",
+                  "attendance": "pending",
+                  "confirmation": "confirmed",
+                  "confirmationSource": "staff",
+                  "confirmedAt": "2026-12-01T12:00:00.000Z",
+                  "arrivedAt": null,
+                  "startedAt": null,
+                  "finishedAt": null,
+                  "cancellationCode": null,
+                  "startsAt": "2026-12-02T13:00:00.000Z",
+                  "endsAt": "2026-12-02T13:45:00.000Z",
+                  "unitId": "eeeeeeee-eeee-4eee-8eee-000000000101",
+                  "segments": [
+                    {
+                      "position": 1,
+                      "startsAt": "2026-12-02T13:00:00.000Z",
+                      "endsAt": "2026-12-02T13:45:00.000Z",
+                      "requiresProfessional": true
+                    }
+                  ],
+                  "allocations": [
+                    {
+                      "resourceId": "eeeeeeee-eeee-4eee-8eee-000000000501",
+                      "kind": "professional",
+                      "forced": false
+                    },
+                    {
+                      "resourceId": "eeeeeeee-eeee-4eee-8eee-000000000502",
+                      "kind": "room",
+                      "forced": false
+                    }
+                  ],
+                  "generation": 1,
+                  "version": 4,
+                  "bookableId": "eeeeeeee-eeee-4eee-8eee-000000000301",
+                  "calendarId": "eeeeeeee-eeee-4eee-8eee-000000000201",
+                  "contactRef": "eeeeeeee-eeee-4eee-8eee-000000000601",
+                  "opportunityRef": "eeeeeeee-eeee-4eee-8eee-000000000701",
+                  "visibility": "shared",
+                  "needsReallocation": false,
+                  "bypassedRestrictions": false,
+                  "overrideReason": null,
+                  "depositStatus": "paid",
+                  "depositAmountCents": 5000,
+                  "depositDueAt": null,
+                  "depositOverdue": false,
+                  "depositPaidCents": 5000,
+                  "depositMethod": "pix",
+                  "depositPaidAt": "2026-12-01T10:00:00.000Z",
+                  "depositNote": null,
+                  "depositRecordedByRef": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                  "depositRecordedAt": "2026-12-01T10:05:00.000Z",
+                  "productRef": "eeeeeeee-eeee-4eee-8eee-000000000401",
+                  "returnAfterDays": 30,
+                  "professionalUserRef": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                  "productName": "consulta-avaliacao",
+                  "productLabel": "Consulta de avaliação",
+                  "productPrice": 180,
+                  "contactName": "Paciente Exemplo",
+                  "contactPhone": "+5500000000000",
+                  "professionalName": "Profissional Exemplo",
+                  "professionalNames": [
+                    "Profissional Exemplo"
+                  ],
+                  "roomName": "Sala 1",
+                  "missingReminderChannel": false,
+                  "receptionNote": "Trazer exames anteriores",
+                  "hasReceptionNote": true
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/AgendaNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/AgendaConflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/AgendaUnprocessable"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -8462,14 +9157,50 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarPassthroughDto"
+                },
+                "example": {
+                  "items": [
+                    {
+                      "id": "eeeeeeee-eeee-4eee-8eee-000000001001",
+                      "eventType": "rescheduled",
+                      "actorRef": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                      "actorName": "Usuário Exemplo",
+                      "actorKind": "user",
+                      "payload": {
+                        "eventType": "rescheduled",
+                        "appointmentId": "eeeeeeee-eeee-4eee-8eee-000000000001",
+                        "startsAt": "2026-12-03T13:00:00.000Z",
+                        "endsAt": "2026-12-03T13:45:00.000Z",
+                        "generation": 2
+                      },
+                      "occurredAt": "2026-11-26T14:00:00.000Z",
+                      "changeFrom": "2026-12-02T13:00:00.000Z",
+                      "changeTo": "2026-12-03T13:00:00.000Z"
+                    }
+                  ],
+                  "total": 1,
+                  "page": 1,
+                  "pageSize": 20
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/AgendaNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -8500,10 +9231,19 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "Observação removida (corpo vazio)"
           },
-          "204": {
-            "description": ""
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/AgendaNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -8532,14 +9272,33 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarPassthroughDto"
+                },
+                "example": {
+                  "appointmentId": "eeeeeeee-eeee-4eee-8eee-000000000001",
+                  "body": "Trazer exames anteriores",
+                  "authorUserId": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                  "authorName": "Usuário Exemplo",
+                  "updatedAt": "2026-11-26T14:00:00.000Z"
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/AgendaNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -8578,14 +9337,36 @@
         },
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarPassthroughDto"
+                },
+                "example": {
+                  "appointmentId": "eeeeeeee-eeee-4eee-8eee-000000000001",
+                  "body": "Trazer exames anteriores",
+                  "authorUserId": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                  "authorName": "Usuário Exemplo",
+                  "updatedAt": "2026-11-26T14:00:00.000Z"
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/AgendaNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -8625,15 +9406,107 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "",
+          "201": {
+            "description": "Criado ou atualizado",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarPassthroughDto"
+                },
+                "example": {
+                  "id": "eeeeeeee-eeee-4eee-8eee-000000000001",
+                  "status": "scheduled",
+                  "attendance": "pending",
+                  "confirmation": "confirmed",
+                  "confirmationSource": "staff",
+                  "confirmedAt": "2026-12-01T12:00:00.000Z",
+                  "arrivedAt": null,
+                  "startedAt": null,
+                  "finishedAt": null,
+                  "cancellationCode": null,
+                  "startsAt": "2026-12-03T13:00:00.000Z",
+                  "endsAt": "2026-12-03T13:45:00.000Z",
+                  "unitId": "eeeeeeee-eeee-4eee-8eee-000000000101",
+                  "segments": [
+                    {
+                      "position": 1,
+                      "startsAt": "2026-12-03T13:00:00.000Z",
+                      "endsAt": "2026-12-03T13:45:00.000Z",
+                      "requiresProfessional": true
+                    }
+                  ],
+                  "allocations": [
+                    {
+                      "resourceId": "eeeeeeee-eeee-4eee-8eee-000000000501",
+                      "kind": "professional",
+                      "forced": false
+                    },
+                    {
+                      "resourceId": "eeeeeeee-eeee-4eee-8eee-000000000502",
+                      "kind": "room",
+                      "forced": false
+                    }
+                  ],
+                  "generation": 2,
+                  "version": 4,
+                  "bookableId": "eeeeeeee-eeee-4eee-8eee-000000000301",
+                  "calendarId": "eeeeeeee-eeee-4eee-8eee-000000000201",
+                  "contactRef": "eeeeeeee-eeee-4eee-8eee-000000000601",
+                  "opportunityRef": "eeeeeeee-eeee-4eee-8eee-000000000701",
+                  "visibility": "shared",
+                  "needsReallocation": false,
+                  "bypassedRestrictions": false,
+                  "overrideReason": null,
+                  "depositStatus": "none",
+                  "depositAmountCents": null,
+                  "depositDueAt": null,
+                  "depositOverdue": false,
+                  "depositPaidCents": null,
+                  "depositMethod": null,
+                  "depositPaidAt": null,
+                  "depositNote": null,
+                  "depositRecordedByRef": null,
+                  "depositRecordedAt": null,
+                  "productRef": "eeeeeeee-eeee-4eee-8eee-000000000401",
+                  "returnAfterDays": 30,
+                  "professionalUserRef": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                  "productName": "consulta-avaliacao",
+                  "productLabel": "Consulta de avaliação",
+                  "productPrice": 180,
+                  "contactName": "Paciente Exemplo",
+                  "contactPhone": "+5500000000000",
+                  "professionalName": "Profissional Exemplo",
+                  "professionalNames": [
+                    "Profissional Exemplo"
+                  ],
+                  "roomName": "Sala 1",
+                  "missingReminderChannel": false,
+                  "receptionNote": "Trazer exames anteriores",
+                  "hasReceptionNote": true
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/AgendaNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/AgendaConflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/AgendaUnprocessable"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -8716,14 +9589,41 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarNextAvailableDto"
+                },
+                "example": {
+                  "bookableId": "eeeeeeee-eeee-4eee-8eee-000000000301",
+                  "period": "any",
+                  "maxAdvanceDays": 60,
+                  "searchedUntil": "2027-01-25T14:00:00.000Z",
+                  "truncated": false,
+                  "items": [
+                    {
+                      "startsAt": "2026-11-27T12:00:00.000Z",
+                      "endsAt": "2026-11-27T12:45:00.000Z",
+                      "unitId": "eeeeeeee-eeee-4eee-8eee-000000000101",
+                      "professionalResourceId": "eeeeeeee-eeee-4eee-8eee-000000000501",
+                      "professionalName": "Profissional Exemplo",
+                      "roomResourceId": "eeeeeeee-eeee-4eee-8eee-000000000502",
+                      "roomName": "Sala 1"
+                    }
+                  ]
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -8745,14 +9645,73 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarPassthroughDto"
+                },
+                "example": {
+                  "items": [
+                    {
+                      "id": "eeeeeeee-eeee-4eee-8eee-000000000301",
+                      "productRef": "eeeeeeee-eeee-4eee-8eee-000000000401",
+                      "name": "Consulta de avaliação",
+                      "status": "active",
+                      "buffers": {
+                        "beforeMinutes": 0,
+                        "afterMinutes": 10
+                      },
+                      "minNotice": 60,
+                      "maxAdvanceDays": 60,
+                      "slotInterval": 15,
+                      "minProfessionals": 1,
+                      "maxProfessionals": 1,
+                      "preparationInstructions": null,
+                      "returnAfterDays": 30,
+                      "depositType": "none",
+                      "depositValue": null,
+                      "depositRetainOnNoShow": false,
+                      "durationTotalMinutes": 45,
+                      "segments": [
+                        {
+                          "id": "eeeeeeee-eeee-4eee-8eee-000000001301",
+                          "position": 1,
+                          "requiresProfessional": true
+                        }
+                      ],
+                      "requirements": [
+                        {
+                          "id": "eeeeeeee-eeee-4eee-8eee-000000001401",
+                          "resourceKind": "room",
+                          "selection": "any_eligible",
+                          "specificResourceId": null,
+                          "quantity": 1,
+                          "required": true,
+                          "eligibleResourceIds": [
+                            "eeeeeeee-eeee-4eee-8eee-000000000502"
+                          ]
+                        }
+                      ],
+                      "version": 2,
+                      "productDuration": 45
+                    }
+                  ],
+                  "total": 1,
+                  "page": 1,
+                  "pageSize": 20
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -8783,14 +9742,69 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarBookableDto"
+                },
+                "example": {
+                  "id": "eeeeeeee-eeee-4eee-8eee-000000000301",
+                  "productRef": "eeeeeeee-eeee-4eee-8eee-000000000401",
+                  "name": "Consulta de avaliação",
+                  "status": "active",
+                  "buffers": {
+                    "beforeMinutes": 0,
+                    "afterMinutes": 10
+                  },
+                  "minNotice": 60,
+                  "maxAdvanceDays": 60,
+                  "slotInterval": 15,
+                  "minProfessionals": 1,
+                  "maxProfessionals": 1,
+                  "preparationInstructions": null,
+                  "returnAfterDays": 30,
+                  "depositType": "none",
+                  "depositValue": null,
+                  "depositRetainOnNoShow": false,
+                  "durationTotalMinutes": 45,
+                  "segments": [
+                    {
+                      "id": "eeeeeeee-eeee-4eee-8eee-000000001301",
+                      "position": 1,
+                      "requiresProfessional": true
+                    }
+                  ],
+                  "requirements": [
+                    {
+                      "id": "eeeeeeee-eeee-4eee-8eee-000000001401",
+                      "resourceKind": "room",
+                      "selection": "any_eligible",
+                      "specificResourceId": null,
+                      "quantity": 1,
+                      "required": true,
+                      "eligibleResourceIds": [
+                        "eeeeeeee-eeee-4eee-8eee-000000000502"
+                      ]
+                    }
+                  ],
+                  "version": 2,
+                  "productDuration": 45
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/AgendaNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -8895,14 +9909,46 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarPassthroughDto"
+                },
+                "example": {
+                  "slots": [
+                    {
+                      "startsAt": "2026-11-27T12:00:00.000Z",
+                      "endsAt": "2026-11-27T12:45:00.000Z",
+                      "unitId": "eeeeeeee-eeee-4eee-8eee-000000000101"
+                    }
+                  ],
+                  "emptyDays": [
+                    {
+                      "date": "2026-11-29",
+                      "reason": "closed"
+                    },
+                    {
+                      "date": "2026-12-25",
+                      "reason": "holiday",
+                      "label": "Natal"
+                    }
+                  ]
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/AgendaNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -8958,14 +10004,47 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarPassthroughDto"
+                },
+                "example": {
+                  "items": [
+                    {
+                      "id": "eeeeeeee-eeee-4eee-8eee-000000000201",
+                      "unitId": "eeeeeeee-eeee-4eee-8eee-000000000101",
+                      "name": "Consultório",
+                      "color": "#7C3AED",
+                      "roomId": null,
+                      "kind": "shared",
+                      "purpose": "service",
+                      "status": "active",
+                      "position": 0,
+                      "version": 4,
+                      "slotIntervalMinutes": 15,
+                      "memberResourceIds": [
+                        "eeeeeeee-eeee-4eee-8eee-000000000501"
+                      ],
+                      "bookableIds": [
+                        "eeeeeeee-eeee-4eee-8eee-000000000301"
+                      ]
+                    }
+                  ],
+                  "total": 1
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -8996,14 +10075,45 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarPassthroughDto"
+                },
+                "example": {
+                  "id": "eeeeeeee-eeee-4eee-8eee-000000000201",
+                  "unitId": "eeeeeeee-eeee-4eee-8eee-000000000101",
+                  "name": "Consultório",
+                  "color": "#7C3AED",
+                  "roomId": null,
+                  "kind": "shared",
+                  "purpose": "service",
+                  "status": "active",
+                  "position": 0,
+                  "version": 4,
+                  "slotIntervalMinutes": 15,
+                  "memberResourceIds": [
+                    "eeeeeeee-eeee-4eee-8eee-000000000501"
+                  ],
+                  "bookableIds": [
+                    "eeeeeeee-eeee-4eee-8eee-000000000301"
+                  ]
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/AgendaNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -9034,14 +10144,42 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarPassthroughDto"
+                },
+                "example": {
+                  "items": [
+                    {
+                      "bookableId": "eeeeeeee-eeee-4eee-8eee-000000000301",
+                      "productRef": "eeeeeeee-eeee-4eee-8eee-000000000401",
+                      "name": "Consulta de avaliação",
+                      "price": 180,
+                      "minProfessionals": 1,
+                      "maxProfessionals": 1
+                    }
+                  ],
+                  "bookableIds": [
+                    "eeeeeeee-eeee-4eee-8eee-000000000301"
+                  ],
+                  "version": 4
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/AgendaNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -9072,14 +10210,47 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarPassthroughDto"
+                },
+                "example": {
+                  "items": [
+                    {
+                      "resourceId": "eeeeeeee-eeee-4eee-8eee-000000000501",
+                      "userId": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                      "name": "Profissional Exemplo",
+                      "avatar": null,
+                      "description": null,
+                      "categories": [
+                        {
+                          "id": "eeeeeeee-eeee-4eee-8eee-000000001501",
+                          "name": "Clínico geral"
+                        }
+                      ]
+                    }
+                  ],
+                  "resourceIds": [
+                    "eeeeeeee-eeee-4eee-8eee-000000000501"
+                  ],
+                  "version": 4
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/AgendaNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -9110,14 +10281,58 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarNotificationsDto"
+                },
+                "example": {
+                  "calendarId": "eeeeeeee-eeee-4eee-8eee-000000000201",
+                  "reminderEnabled": true,
+                  "reminderLeadsMinutes": [
+                    1440,
+                    120
+                  ],
+                  "reminderTemplate": null,
+                  "reminderTemplates": [
+                    {
+                      "leadMinutes": 1440,
+                      "template": "Olá, {contato}! Lembrete da sua consulta amanhã."
+                    }
+                  ],
+                  "confirmationLeadMinutes": null,
+                  "confirmationTemplate": null,
+                  "secondConfirmationLeadMinutes": null,
+                  "secondConfirmationTemplate": null,
+                  "noticeTemplates": {},
+                  "reminderFixedTimes": [],
+                  "confirmationFixedTime": null,
+                  "secondConfirmationFixedTime": null,
+                  "notifyWhatsapp": true,
+                  "whatsappChannelId": null,
+                  "notifyEmail": false,
+                  "confirmationLinkEnabled": true,
+                  "notifyBooked": true,
+                  "notifyCancelled": true,
+                  "notifyNoShow": false,
+                  "confirmationConditions": null,
+                  "secondConfirmationConditions": null
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/AgendaNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -9139,14 +10354,58 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarPassthroughDto"
+                },
+                "example": {
+                  "items": [
+                    {
+                      "id": "eeeeeeee-eeee-4eee-8eee-000000000501",
+                      "kind": "professional",
+                      "name": "Profissional Exemplo",
+                      "externalRef": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                      "parentResourceId": null,
+                      "unitId": "eeeeeeee-eeee-4eee-8eee-000000000101",
+                      "defaultCapacity": 1,
+                      "bufferBefore": 0,
+                      "bufferAfter": 0,
+                      "maxAppointmentsPerDay": null,
+                      "status": "active",
+                      "version": 2
+                    },
+                    {
+                      "id": "eeeeeeee-eeee-4eee-8eee-000000000502",
+                      "kind": "room",
+                      "name": "Sala 1",
+                      "externalRef": null,
+                      "parentResourceId": null,
+                      "unitId": "eeeeeeee-eeee-4eee-8eee-000000000101",
+                      "defaultCapacity": 1,
+                      "bufferBefore": 0,
+                      "bufferAfter": 0,
+                      "maxAppointmentsPerDay": null,
+                      "status": "active",
+                      "version": 1
+                    }
+                  ],
+                  "total": 2,
+                  "page": 1,
+                  "pageSize": 20
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -9188,14 +10447,46 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarAvailabilityRulesDto"
+                },
+                "example": {
+                  "items": [
+                    {
+                      "id": "eeeeeeee-eeee-4eee-8eee-000000001201",
+                      "ruleType": "weekly_window",
+                      "unitId": "eeeeeeee-eeee-4eee-8eee-000000000101",
+                      "weekday": 1,
+                      "dateFrom": null,
+                      "dateUntil": null,
+                      "startTime": "08:00",
+                      "endTime": "12:00",
+                      "capacity": 1,
+                      "priority": null,
+                      "source": null,
+                      "label": null,
+                      "calendarId": null
+                    }
+                  ],
+                  "version": 3
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/AgendaNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -9217,14 +10508,47 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarSettingsDto"
+                },
+                "example": {
+                  "tenantId": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+                  "advancedMode": false,
+                  "reminderEnabled": true,
+                  "reminderLeadMinutes": 1440,
+                  "reminderLeadsMinutes": [
+                    1440
+                  ],
+                  "reminderTemplate": "Olá, {contato}! Lembrete da sua consulta.",
+                  "cancellationReasons": [
+                    {
+                      "code": "outro",
+                      "label": "Outro"
+                    }
+                  ],
+                  "holdTtlMinutes": 10,
+                  "allowNonWorkingDayBooking": true,
+                  "lateToleranceMinutes": 10,
+                  "depositPixKey": null,
+                  "depositPixHolder": null,
+                  "depositDueHoursBefore": 24,
+                  "cancellationPolicyHours": 24,
+                  "version": 1
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -9246,14 +10570,48 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarPassthroughDto"
+                },
+                "example": {
+                  "items": [
+                    {
+                      "id": "eeeeeeee-eeee-4eee-8eee-000000000101",
+                      "name": "Principal",
+                      "timezone": "America/Sao_Paulo",
+                      "defaultWindow": {
+                        "weekdays": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5
+                        ],
+                        "startTime": "08:00",
+                        "endTime": "18:00"
+                      },
+                      "status": "active",
+                      "version": 1
+                    }
+                  ],
+                  "total": 1,
+                  "page": 1,
+                  "pageSize": 20
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -9346,14 +10704,55 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarPassthroughDto"
+                },
+                "example": {
+                  "items": [
+                    {
+                      "id": "eeeeeeee-eeee-4eee-8eee-000000000901",
+                      "contactRef": "eeeeeeee-eeee-4eee-8eee-000000000601",
+                      "bookableId": "eeeeeeee-eeee-4eee-8eee-000000000301",
+                      "professionalResourceId": null,
+                      "preferredPeriod": "morning",
+                      "dateFrom": "2026-12-01",
+                      "dateTo": "2026-12-15",
+                      "expiresOn": "2026-12-15",
+                      "note": null,
+                      "status": "waiting",
+                      "offeredStartsAt": null,
+                      "offeredAt": null,
+                      "offeredByRef": null,
+                      "appointmentId": null,
+                      "removalReason": null,
+                      "createdByRef": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                      "version": 1,
+                      "createdAt": "2026-11-26T14:00:00.000Z",
+                      "updatedAt": "2026-11-26T14:00:00.000Z",
+                      "contactName": "Paciente Exemplo",
+                      "contactPhone": "+5500000000000",
+                      "productName": "Consulta de avaliação",
+                      "professionalName": null
+                    }
+                  ],
+                  "total": 1,
+                  "page": 1,
+                  "pageSize": 20
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -9382,25 +10781,58 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          },
           "201": {
-            "description": "",
+            "description": "Criado ou atualizado",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarPassthroughDto"
+                },
+                "example": {
+                  "id": "eeeeeeee-eeee-4eee-8eee-000000000901",
+                  "contactRef": "eeeeeeee-eeee-4eee-8eee-000000000601",
+                  "bookableId": "eeeeeeee-eeee-4eee-8eee-000000000301",
+                  "professionalResourceId": null,
+                  "preferredPeriod": "morning",
+                  "dateFrom": "2026-12-01",
+                  "dateTo": "2026-12-15",
+                  "expiresOn": "2026-12-15",
+                  "note": null,
+                  "status": "waiting",
+                  "offeredStartsAt": null,
+                  "offeredAt": null,
+                  "offeredByRef": null,
+                  "appointmentId": null,
+                  "removalReason": null,
+                  "createdByRef": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                  "version": 1,
+                  "createdAt": "2026-11-26T14:00:00.000Z",
+                  "updatedAt": "2026-11-26T14:00:00.000Z",
+                  "contactName": "Paciente Exemplo",
+                  "contactPhone": "+5500000000000",
+                  "productName": "Consulta de avaliação",
+                  "professionalName": null
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/AgendaNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/AgendaConflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -9431,14 +10863,51 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarPassthroughDto"
+                },
+                "example": {
+                  "id": "eeeeeeee-eeee-4eee-8eee-000000000901",
+                  "contactRef": "eeeeeeee-eeee-4eee-8eee-000000000601",
+                  "bookableId": "eeeeeeee-eeee-4eee-8eee-000000000301",
+                  "professionalResourceId": null,
+                  "preferredPeriod": "morning",
+                  "dateFrom": "2026-12-01",
+                  "dateTo": "2026-12-15",
+                  "expiresOn": "2026-12-15",
+                  "note": null,
+                  "status": "waiting",
+                  "offeredStartsAt": null,
+                  "offeredAt": null,
+                  "offeredByRef": null,
+                  "appointmentId": null,
+                  "removalReason": null,
+                  "createdByRef": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                  "version": 1,
+                  "createdAt": "2026-11-26T14:00:00.000Z",
+                  "updatedAt": "2026-11-26T14:00:00.000Z",
+                  "contactName": "Paciente Exemplo",
+                  "contactPhone": "+5500000000000",
+                  "productName": "Consulta de avaliação",
+                  "professionalName": null
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/AgendaNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -9469,14 +10938,41 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarPassthroughDto"
+                },
+                "example": {
+                  "items": [
+                    {
+                      "id": "eeeeeeee-eeee-4eee-8eee-000000001101",
+                      "entryId": "eeeeeeee-eeee-4eee-8eee-000000000901",
+                      "eventType": "created",
+                      "actorRef": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                      "payload": {},
+                      "occurredAt": "2026-11-26T14:00:00.000Z"
+                    }
+                  ],
+                  "total": 1,
+                  "page": 1,
+                  "pageSize": 20
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/AgendaNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -9516,15 +11012,58 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "",
+          "201": {
+            "description": "Criado ou atualizado",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarPassthroughDto"
+                },
+                "example": {
+                  "id": "eeeeeeee-eeee-4eee-8eee-000000000901",
+                  "contactRef": "eeeeeeee-eeee-4eee-8eee-000000000601",
+                  "bookableId": "eeeeeeee-eeee-4eee-8eee-000000000301",
+                  "professionalResourceId": null,
+                  "preferredPeriod": "morning",
+                  "dateFrom": "2026-12-01",
+                  "dateTo": "2026-12-15",
+                  "expiresOn": "2026-12-15",
+                  "note": null,
+                  "status": "waiting",
+                  "offeredStartsAt": null,
+                  "offeredAt": null,
+                  "offeredByRef": null,
+                  "appointmentId": null,
+                  "removalReason": null,
+                  "createdByRef": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                  "version": 3,
+                  "createdAt": "2026-11-26T14:00:00.000Z",
+                  "updatedAt": "2026-11-26T14:00:00.000Z",
+                  "contactName": "Paciente Exemplo",
+                  "contactPhone": "+5500000000000",
+                  "productName": "Consulta de avaliação",
+                  "professionalName": null
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/AgendaNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/AgendaConflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -9564,15 +11103,58 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "",
+          "201": {
+            "description": "Criado ou atualizado",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CalendarPassthroughDto"
+                },
+                "example": {
+                  "id": "eeeeeeee-eeee-4eee-8eee-000000000901",
+                  "contactRef": "eeeeeeee-eeee-4eee-8eee-000000000601",
+                  "bookableId": "eeeeeeee-eeee-4eee-8eee-000000000301",
+                  "professionalResourceId": null,
+                  "preferredPeriod": "morning",
+                  "dateFrom": "2026-12-01",
+                  "dateTo": "2026-12-15",
+                  "expiresOn": "2026-12-15",
+                  "note": null,
+                  "status": "removed",
+                  "offeredStartsAt": null,
+                  "offeredAt": null,
+                  "offeredByRef": null,
+                  "appointmentId": null,
+                  "removalReason": "Paciente desistiu",
+                  "createdByRef": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                  "version": 2,
+                  "createdAt": "2026-11-26T14:00:00.000Z",
+                  "updatedAt": "2026-11-26T14:00:00.000Z",
+                  "contactName": "Paciente Exemplo",
+                  "contactPhone": "+5500000000000",
+                  "productName": "Consulta de avaliação",
+                  "professionalName": null
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AgendaForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/AgendaNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/AgendaConflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -9613,14 +11195,39 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OpportunityWebFormsDto"
+                },
+                "example": {
+                  "rows": [
+                    {
+                      "id": "eeeeeeee-eeee-4eee-8eee-000000002001",
+                      "title": "Agende sua avaliação",
+                      "publicId": "Xk3p9QaB2cE",
+                      "lastSubmission": {
+                        "id": "eeeeeeee-eeee-4eee-8eee-000000002101",
+                        "createdAt": "2026-11-25T18:12:00.000Z"
+                      }
+                    }
+                  ]
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -9659,14 +11266,59 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/WebFormSubmissionDetailDto"
+                },
+                "example": {
+                  "id": "eeeeeeee-eeee-4eee-8eee-000000002101",
+                  "createdAt": "2026-11-25T18:12:00.000Z",
+                  "kind": "create",
+                  "contact": {
+                    "id": "eeeeeeee-eeee-4eee-8eee-000000000601",
+                    "name": "Paciente Exemplo",
+                    "phone": "+5500000000000",
+                    "deleted": false
+                  },
+                  "opportunity": {
+                    "id": "eeeeeeee-eeee-4eee-8eee-000000000701",
+                    "name": "Paciente Exemplo",
+                    "deleted": false
+                  },
+                  "utmSource": "instagram",
+                  "utmCampaign": "avaliacao-dezembro",
+                  "hasActionErrors": false,
+                  "values": [
+                    {
+                      "elementId": "eeeeeeee-eeee-4eee-8eee-000000002201",
+                      "label": "Nome",
+                      "type": "TEXT",
+                      "value": "Paciente Exemplo",
+                      "removed": false
+                    }
+                  ],
+                  "tracking": {
+                    "utm_source": "instagram",
+                    "utm_campaign": "avaliacao-dezembro"
+                  },
+                  "actionErrors": []
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -9745,14 +11397,46 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PaginatedWebFormsDto"
+                },
+                "example": {
+                  "rows": [
+                    {
+                      "id": "eeeeeeee-eeee-4eee-8eee-000000002001",
+                      "publicId": "Xk3p9QaB2cE",
+                      "title": "Agende sua avaliação",
+                      "type": "capture",
+                      "createdBy": {
+                        "id": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                        "name": "Usuário Exemplo"
+                      },
+                      "createdAt": "2026-11-20T12:00:00.000Z",
+                      "updatedAt": "2026-11-25T09:30:00.000Z"
+                    }
+                  ],
+                  "meta": {
+                    "perPage": 20,
+                    "currentPage": 1,
+                    "totalItems": 1,
+                    "totalPages": 1,
+                    "hasMore": false
+                  }
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -9782,14 +11466,96 @@
         },
         "responses": {
           "201": {
-            "description": "",
+            "description": "Criado ou atualizado",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/WebFormViewDto"
+                },
+                "example": {
+                  "id": "eeeeeeee-eeee-4eee-8eee-000000002001",
+                  "publicId": "Xk3p9QaB2cE",
+                  "title": "Agende sua avaliação",
+                  "type": "capture",
+                  "description": "Deixe seus dados e retornamos para marcar o horário.",
+                  "elements": [
+                    {
+                      "kind": "heading",
+                      "id": "eeeeeeee-eeee-4eee-8eee-000000002202",
+                      "text": "Seus dados"
+                    },
+                    {
+                      "kind": "field",
+                      "id": "eeeeeeee-eeee-4eee-8eee-000000002201",
+                      "propertyId": "eeeeeeee-eeee-4eee-8eee-000000002301",
+                      "entityType": "CONTACT",
+                      "label": "Nome",
+                      "placeholder": "Seu nome",
+                      "helpText": null,
+                      "required": true,
+                      "hidden": false,
+                      "urlParam": null,
+                      "width": "full",
+                      "unavailable": false
+                    }
+                  ],
+                  "styles": {
+                    "layout": "one-column",
+                    "theme": "light",
+                    "primaryColor": "#FECF01",
+                    "submitLabel": "Enviar"
+                  },
+                  "pages": {
+                    "start": {
+                      "enabled": false
+                    },
+                    "thankYou": {
+                      "title": "Recebemos seus dados",
+                      "text": "Em breve entraremos em contato."
+                    }
+                  },
+                  "settings": {
+                    "pipelineId": "eeeeeeee-eeee-4eee-8eee-000000002401",
+                    "pipelineStageId": "eeeeeeee-eeee-4eee-8eee-000000002501",
+                    "redirectUrl": null,
+                    "forwardTrackingParams": true,
+                    "termsUrl": null,
+                    "updateFilledFields": true,
+                    "updateAllFields": false,
+                    "populateWithFilledData": false,
+                    "opportunityNameTemplate": null,
+                    "updateOpportunityName": false,
+                    "postSubmitActions": [],
+                    "emailNotification": {
+                      "enabled": false,
+                      "extraEmails": []
+                    }
+                  },
+                  "createdBy": {
+                    "id": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                    "name": "Usuário Exemplo"
+                  },
+                  "updatedBy": {
+                    "id": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                    "name": "Usuário Exemplo"
+                  },
+                  "createdAt": "2026-11-20T12:00:00.000Z",
+                  "updatedAt": "2026-11-25T09:30:00.000Z"
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -9821,6 +11587,18 @@
         "responses": {
           "204": {
             "description": ""
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -9849,14 +11627,96 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/WebFormViewDto"
+                },
+                "example": {
+                  "id": "eeeeeeee-eeee-4eee-8eee-000000002001",
+                  "publicId": "Xk3p9QaB2cE",
+                  "title": "Agende sua avaliação",
+                  "type": "capture",
+                  "description": "Deixe seus dados e retornamos para marcar o horário.",
+                  "elements": [
+                    {
+                      "kind": "heading",
+                      "id": "eeeeeeee-eeee-4eee-8eee-000000002202",
+                      "text": "Seus dados"
+                    },
+                    {
+                      "kind": "field",
+                      "id": "eeeeeeee-eeee-4eee-8eee-000000002201",
+                      "propertyId": "eeeeeeee-eeee-4eee-8eee-000000002301",
+                      "entityType": "CONTACT",
+                      "label": "Nome",
+                      "placeholder": "Seu nome",
+                      "helpText": null,
+                      "required": true,
+                      "hidden": false,
+                      "urlParam": null,
+                      "width": "full",
+                      "unavailable": false
+                    }
+                  ],
+                  "styles": {
+                    "layout": "one-column",
+                    "theme": "light",
+                    "primaryColor": "#FECF01",
+                    "submitLabel": "Enviar"
+                  },
+                  "pages": {
+                    "start": {
+                      "enabled": false
+                    },
+                    "thankYou": {
+                      "title": "Recebemos seus dados",
+                      "text": "Em breve entraremos em contato."
+                    }
+                  },
+                  "settings": {
+                    "pipelineId": "eeeeeeee-eeee-4eee-8eee-000000002401",
+                    "pipelineStageId": "eeeeeeee-eeee-4eee-8eee-000000002501",
+                    "redirectUrl": null,
+                    "forwardTrackingParams": true,
+                    "termsUrl": null,
+                    "updateFilledFields": true,
+                    "updateAllFields": false,
+                    "populateWithFilledData": false,
+                    "opportunityNameTemplate": null,
+                    "updateOpportunityName": false,
+                    "postSubmitActions": [],
+                    "emailNotification": {
+                      "enabled": false,
+                      "extraEmails": []
+                    }
+                  },
+                  "createdBy": {
+                    "id": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                    "name": "Usuário Exemplo"
+                  },
+                  "updatedBy": {
+                    "id": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                    "name": "Usuário Exemplo"
+                  },
+                  "createdAt": "2026-11-20T12:00:00.000Z",
+                  "updatedAt": "2026-11-25T09:30:00.000Z"
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -9895,14 +11755,99 @@
         },
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/WebFormViewDto"
+                },
+                "example": {
+                  "id": "eeeeeeee-eeee-4eee-8eee-000000002001",
+                  "publicId": "Xk3p9QaB2cE",
+                  "title": "Agende sua avaliação",
+                  "type": "capture",
+                  "description": "Deixe seus dados e retornamos para marcar o horário.",
+                  "elements": [
+                    {
+                      "kind": "heading",
+                      "id": "eeeeeeee-eeee-4eee-8eee-000000002202",
+                      "text": "Seus dados"
+                    },
+                    {
+                      "kind": "field",
+                      "id": "eeeeeeee-eeee-4eee-8eee-000000002201",
+                      "propertyId": "eeeeeeee-eeee-4eee-8eee-000000002301",
+                      "entityType": "CONTACT",
+                      "label": "Nome",
+                      "placeholder": "Seu nome",
+                      "helpText": null,
+                      "required": true,
+                      "hidden": false,
+                      "urlParam": null,
+                      "width": "full",
+                      "unavailable": false
+                    }
+                  ],
+                  "styles": {
+                    "layout": "one-column",
+                    "theme": "light",
+                    "primaryColor": "#FECF01",
+                    "submitLabel": "Enviar"
+                  },
+                  "pages": {
+                    "start": {
+                      "enabled": false
+                    },
+                    "thankYou": {
+                      "title": "Recebemos seus dados",
+                      "text": "Em breve entraremos em contato."
+                    }
+                  },
+                  "settings": {
+                    "pipelineId": "eeeeeeee-eeee-4eee-8eee-000000002401",
+                    "pipelineStageId": "eeeeeeee-eeee-4eee-8eee-000000002501",
+                    "redirectUrl": null,
+                    "forwardTrackingParams": true,
+                    "termsUrl": null,
+                    "updateFilledFields": true,
+                    "updateAllFields": false,
+                    "populateWithFilledData": false,
+                    "opportunityNameTemplate": null,
+                    "updateOpportunityName": false,
+                    "postSubmitActions": [],
+                    "emailNotification": {
+                      "enabled": false,
+                      "extraEmails": []
+                    }
+                  },
+                  "createdBy": {
+                    "id": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                    "name": "Usuário Exemplo"
+                  },
+                  "updatedBy": {
+                    "id": "eeeeeeee-eeee-4eee-8eee-000000000801",
+                    "name": "Usuário Exemplo"
+                  },
+                  "createdAt": "2026-11-20T12:00:00.000Z",
+                  "updatedAt": "2026-11-25T09:30:00.000Z"
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -9947,14 +11892,54 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/WebFormAnalyticsDto"
+                },
+                "example": {
+                  "views": 200,
+                  "submissions": {
+                    "total": 25,
+                    "create": 20,
+                    "update": 5
+                  },
+                  "conversionRate": 0.125,
+                  "daily": [
+                    {
+                      "date": "2026-11-25",
+                      "views": 40,
+                      "submissions": 6
+                    }
+                  ],
+                  "utmSources": [
+                    {
+                      "value": "instagram",
+                      "count": 18
+                    }
+                  ],
+                  "utmCampaigns": [
+                    {
+                      "value": "avaliacao-dezembro",
+                      "count": 15
+                    }
+                  ]
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -9995,14 +11980,33 @@
         },
         "responses": {
           "201": {
-            "description": "",
+            "description": "Criado ou atualizado",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/WebFormLinkDto"
+                },
+                "example": {
+                  "url": "https://app.renkecrm.com/f/Xk3p9QaB2cE?id=TOKEN_DO_LINK",
+                  "expiresAt": "2026-12-26T14:00:00.000Z"
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -10084,14 +12088,56 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PaginatedWebFormSubmissionsDto"
+                },
+                "example": {
+                  "rows": [
+                    {
+                      "id": "eeeeeeee-eeee-4eee-8eee-000000002101",
+                      "createdAt": "2026-11-25T18:12:00.000Z",
+                      "kind": "create",
+                      "contact": {
+                        "id": "eeeeeeee-eeee-4eee-8eee-000000000601",
+                        "name": "Paciente Exemplo",
+                        "phone": "+5500000000000",
+                        "deleted": false
+                      },
+                      "opportunity": {
+                        "id": "eeeeeeee-eeee-4eee-8eee-000000000701",
+                        "name": "Paciente Exemplo",
+                        "deleted": false
+                      },
+                      "utmSource": "instagram",
+                      "utmCampaign": "avaliacao-dezembro",
+                      "hasActionErrors": false
+                    }
+                  ],
+                  "meta": {
+                    "perPage": 20,
+                    "currentPage": 1,
+                    "totalItems": 1,
+                    "totalPages": 1,
+                    "hasMore": false
+                  }
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -10130,14 +12176,59 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/WebFormSubmissionDetailDto"
+                },
+                "example": {
+                  "id": "eeeeeeee-eeee-4eee-8eee-000000002101",
+                  "createdAt": "2026-11-25T18:12:00.000Z",
+                  "kind": "create",
+                  "contact": {
+                    "id": "eeeeeeee-eeee-4eee-8eee-000000000601",
+                    "name": "Paciente Exemplo",
+                    "phone": "+5500000000000",
+                    "deleted": false
+                  },
+                  "opportunity": {
+                    "id": "eeeeeeee-eeee-4eee-8eee-000000000701",
+                    "name": "Paciente Exemplo",
+                    "deleted": false
+                  },
+                  "utmSource": "instagram",
+                  "utmCampaign": "avaliacao-dezembro",
+                  "hasActionErrors": false,
+                  "values": [
+                    {
+                      "elementId": "eeeeeeee-eeee-4eee-8eee-000000002201",
+                      "label": "Nome",
+                      "type": "TEXT",
+                      "value": "Paciente Exemplo",
+                      "removed": false
+                    }
+                  ],
+                  "tracking": {
+                    "utm_source": "instagram",
+                    "utm_campaign": "avaliacao-dezembro"
+                  },
+                  "actionErrors": []
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "security": [
@@ -36850,6 +38941,399 @@
           "cancellationCode",
           "version"
         ]
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Corpo ou parâmetros inválidos. `errors` traz cada campo recusado.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "statusCode": {
+                  "type": "integer"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string",
+                  "description": "Código estável do erro, quando existe."
+                }
+              }
+            },
+            "examples": {
+              "validacao": {
+                "summary": "Campo obrigatório ausente",
+                "value": {
+                  "statusCode": 400,
+                  "message": "Dados inválidos na requisição",
+                  "errors": [
+                    {
+                      "code": "invalid_type",
+                      "expected": "string",
+                      "received": "undefined",
+                      "path": [
+                        "startsAt"
+                      ],
+                      "message": "Required"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Chave ausente, inválida ou revogada, ou usada fora de `/v1`.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "statusCode": {
+                  "type": "integer"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string",
+                  "description": "Código estável do erro, quando existe."
+                }
+              }
+            },
+            "examples": {
+              "semChave": {
+                "summary": "Sem o header Authorization",
+                "value": {
+                  "message": "Authorization header is required",
+                  "error": "Unauthorized",
+                  "statusCode": 401
+                }
+              },
+              "chaveInvalida": {
+                "summary": "Chave inválida ou revogada",
+                "value": {
+                  "message": "Invalid or revoked API key",
+                  "error": "Unauthorized",
+                  "statusCode": 401
+                }
+              }
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Chave sem o escopo da operação, ou `tenant-id` diferente do tenant da chave.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "statusCode": {
+                  "type": "integer"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string",
+                  "description": "Código estável do erro, quando existe."
+                }
+              }
+            },
+            "examples": {
+              "semEscopo": {
+                "summary": "Chave sem o escopo",
+                "value": {
+                  "message": "Você não tem permissão para realizar esta ação",
+                  "error": "Forbidden",
+                  "statusCode": 403
+                }
+              },
+              "outroTenant": {
+                "summary": "tenant-id de outro tenant",
+                "value": {
+                  "message": "tenant-id header does not match API key tenant",
+                  "error": "Forbidden",
+                  "statusCode": 403
+                }
+              }
+            }
+          }
+        }
+      },
+      "AgendaForbidden": {
+        "description": "Chave sem o escopo da operação, `tenant-id` diferente do tenant da chave, ou módulo Agenda desligado no tenant.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "statusCode": {
+                  "type": "integer"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string",
+                  "description": "Código estável do erro, quando existe."
+                }
+              }
+            },
+            "examples": {
+              "semEscopo": {
+                "summary": "Chave sem o escopo",
+                "value": {
+                  "message": "Você não tem permissão para realizar esta ação",
+                  "error": "Forbidden",
+                  "statusCode": 403
+                }
+              },
+              "moduloDesligado": {
+                "summary": "Módulo Agenda desligado",
+                "value": {
+                  "message": "Feature not enabled for this tenant",
+                  "code": "FEATURE_NOT_ENABLED"
+                }
+              },
+              "outroTenant": {
+                "summary": "tenant-id de outro tenant",
+                "value": {
+                  "message": "tenant-id header does not match API key tenant",
+                  "error": "Forbidden",
+                  "statusCode": 403
+                }
+              }
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Recurso não encontrado no tenant da chave, ou id fora do formato UUID.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "statusCode": {
+                  "type": "integer"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string",
+                  "description": "Código estável do erro, quando existe."
+                }
+              }
+            },
+            "examples": {
+              "naoEncontrado": {
+                "summary": "Formulário não encontrado",
+                "value": {
+                  "message": "Formulário não encontrado",
+                  "error": "Not Found",
+                  "statusCode": 404
+                }
+              },
+              "idInvalido": {
+                "summary": "Id que não é UUID",
+                "value": {
+                  "message": "Cannot GET /v1/web-forms/abc",
+                  "error": "Not Found",
+                  "statusCode": 404
+                }
+              }
+            }
+          }
+        }
+      },
+      "AgendaNotFound": {
+        "description": "Recurso não encontrado no tenant da chave, ou id fora do formato UUID. O `code` diz o que faltou (`APPOINTMENT_NOT_FOUND`, `CALENDAR_NOT_FOUND`, `BOOKABLE_NOT_FOUND`, `RESOURCE_NOT_FOUND`, `WAITLIST_ENTRY_NOT_FOUND`, `NOTE_NOT_FOUND`, `CONTACT_NOT_FOUND`, `OPPORTUNITY_NOT_FOUND`).",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "statusCode": {
+                  "type": "integer"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string",
+                  "description": "Código estável do erro, quando existe."
+                }
+              }
+            },
+            "examples": {
+              "naoEncontrado": {
+                "summary": "Agendamento não encontrado",
+                "value": {
+                  "code": "APPOINTMENT_NOT_FOUND",
+                  "message": "Agendamento não encontrado"
+                }
+              },
+              "idInvalido": {
+                "summary": "Id que não é UUID",
+                "value": {
+                  "message": "Cannot GET /v1/calendar/appointments/abc",
+                  "error": "Not Found",
+                  "statusCode": 404
+                }
+              }
+            }
+          }
+        }
+      },
+      "AgendaConflict": {
+        "description": "Conflito com o estado atual: horário ocupado, versão divergente ou transição que o item não aceita mais.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "statusCode": {
+                  "type": "integer"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string",
+                  "description": "Código estável do erro, quando existe."
+                }
+              }
+            },
+            "examples": {
+              "horarioOcupado": {
+                "summary": "Profissional ocupado no horário",
+                "value": {
+                  "code": "PROFESSIONAL_CONFLICT",
+                  "message": "Profissional indicado indisponível",
+                  "details": {
+                    "resourceIds": [
+                      "eeeeeeee-eeee-4eee-8eee-000000000501"
+                    ],
+                    "reason": "busy"
+                  }
+                }
+              },
+              "versao": {
+                "summary": "Versão divergente",
+                "value": {
+                  "code": "VERSION_CONFLICT",
+                  "message": "Versão divergente"
+                }
+              }
+            }
+          }
+        }
+      },
+      "AgendaUnprocessable": {
+        "description": "Pedido bem formado, mas recusado por regra da agenda. O `code` diz qual (por exemplo `OPPORTUNITY_REQUIRED`, `OPPORTUNITY_CONTACT_MISMATCH`, `OUTSIDE_BOOKING_WINDOW`, `BOOKABLE_BLOCKED`, `CANCELLATION_NOTE_REQUIRED`, `PROFESSIONAL_NOT_IN_CALENDAR`, `DEPOSIT_PENDING`).",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "statusCode": {
+                  "type": "integer"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string",
+                  "description": "Código estável do erro, quando existe."
+                }
+              }
+            },
+            "examples": {
+              "semOportunidade": {
+                "summary": "Agendamento sem oportunidade",
+                "value": {
+                  "code": "OPPORTUNITY_REQUIRED",
+                  "message": "Escolha o contato e a oportunidade do agendamento"
+                }
+              },
+              "foraDaJanela": {
+                "summary": "Fora da antecedência mínima",
+                "value": {
+                  "code": "OUTSIDE_BOOKING_WINDOW",
+                  "message": "Fora da antecedência mínima"
+                }
+              }
+            }
+          }
+        }
+      },
+      "TooManyRequests": {
+        "description": "Limite de requisições excedido. `retryAfter` é a espera sugerida, em segundos.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "statusCode": {
+                  "type": "integer"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string",
+                  "description": "Código estável do erro, quando existe."
+                }
+              }
+            },
+            "examples": {
+              "limite": {
+                "summary": "Limite excedido",
+                "value": {
+                  "statusCode": 429,
+                  "message": "Muitas tentativas em pouco tempo. Tente novamente em instantes.",
+                  "error": "Too Many Requests",
+                  "code": "RATE_LIMITED",
+                  "retryAfter": 30
+                }
+              }
+            }
+          }
+        }
       }
     }
   },
