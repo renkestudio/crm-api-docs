@@ -3,6 +3,8 @@ title: "Limites e erros"
 description: "Rate limit, códigos HTTP e formato das respostas de erro."
 ---
 
+<Warning>**Mudança:** chave de API (`rnk_`) nova só é aceita em `https://api.renkecrm.com/v1/...`; em endereços sem `/v1` (por exemplo, `https://api.renkecrm.com/opportunities`), ela recebe `401`. Chave criada antes dessa mudança continua aceita nas rotas sem `/v1`, por compatibilidade. Use `/v1` sempre: basta acrescentar `/v1` ao caminho, o resto da chamada não muda.</Warning>
+
 ## Rate limit
 
 As requisições são limitadas por chave + IP. Ao exceder o limite, a API responde `429 Too Many Requests`.
@@ -18,8 +20,9 @@ Boas práticas: use *backoff* exponencial em 429 e 5xx, e prefira webhooks a *po
 | `200` / `201` | Sucesso |
 | `400` | Corpo ou parâmetros inválidos |
 | `401` | Chave ausente, inválida ou revogada |
+| `401` | Chave de API nova usada fora de `/v1`. Mensagem: `Chave de API só é aceita na API pública /v1` |
 | `403` | Escopo insuficiente ou `tenant-id` diferente do tenant da chave |
-| `404` | Recurso não encontrado |
+| `404` | Recurso não encontrado, ou rota que não faz parte da API pública |
 | `409` | Conflito (ex.: registro duplicado) |
 | `429` | Limite de requisições excedido |
 | `5xx` | Erro interno — tente novamente |

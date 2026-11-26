@@ -55,3 +55,15 @@ Neste guia você gera uma chave `rnk_`, descobre o seu `tenant-id` e faz a prime
 </Steps>
 
 <Check>Pronto! Sua integração está autenticada. Explore a aba **Referência da API** para criar contatos, empresas e oportunidades.</Check>
+
+## Agendamentos de uma oportunidade
+
+Com uma chave que tenha o escopo `appointment:read`, filtre a lista de agendamentos pelo id da oportunidade:
+
+```bash
+curl "https://api.renkecrm.com/v1/calendar/appointments?opportunityRef=$OPPORTUNITY_ID" \
+  -H "Authorization: Bearer $RENKE_API_KEY" \
+  -H "tenant-id: $RENKE_TENANT_ID"
+```
+
+A resposta traz `items`, `total`, `page` e `pageSize`. A Agenda só responde nos tenants com o módulo Agenda ligado; nos outros, a chamada devolve `403`. Veja o exemplo completo em [Lista agendamentos](/api-reference/agenda/lista-agendamentos).
