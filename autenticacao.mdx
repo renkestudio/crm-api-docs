@@ -13,7 +13,7 @@ tenant-id: 00000000-0000-0000-0000-000000000000
 | `Authorization` | Sim | `Bearer` + chave de API (prefixo `rnk_`). O prefixo `Bearer` é case-sensitive. |
 | `tenant-id` | Sim | UUID da sua conta (tenant). Precisa ser o mesmo tenant da chave. |
 
-<Warning>A chave de API (`rnk_`) só vale na API pública, em `https://api.renkecrm.com/v1/...`. Em endereços sem `/v1`, a chamada com a chave recebe `401` com a mensagem `Chave de API só é aceita na API pública /v1`.</Warning>
+<Warning>Chave de API (`rnk_`) nova só vale na API pública, em `https://api.renkecrm.com/v1/...`. Em endereços sem `/v1`, a chamada com ela recebe `401` com a mensagem `Chave de API só é aceita na API pública /v1`. Chave criada antes dessa mudança continua aceita nas rotas sem `/v1`, por compatibilidade. Use `/v1` sempre.</Warning>
 
 ## Gerando sua chave de API
 
@@ -46,7 +46,7 @@ A chave age em nome do usuário que a criou e só acessa os recursos dos escopos
 | `appointment:read` | Agendamentos: leitura | Ver agendamentos, horários livres, calendários, equipe e lista de espera. |
 | `appointment:write` | Agendamentos: escrita | Criar, reagendar e cancelar agendamentos, marcar presença, confirmação e sinal, e mexer na lista de espera. Pode disparar os avisos ao paciente que estiverem ligados no calendário. |
 | `calendar_config:read` | Configuração da agenda: leitura | Ver configurações da agenda, unidades, recursos, regras de horário e serviços. Só leitura. |
-| `web_form:read` | Formulários: leitura | Ver formulários, indicadores e envios, incluindo os dados de contato preenchidos. `web_form:read` dá acesso aos envios dos formulários, incluindo os dados de contato que a pessoa preencheu (nome, telefone, e-mail e os demais campos). Esse acesso não depende de `contact:read`. Conceda esse escopo só a integrações que podem tratar esses dados pessoais. |
+| `web_form:read` | Formulários: leitura | Ver formulários, indicadores e envios, incluindo os dados de contato que a pessoa preencheu (nome, telefone, e-mail e os demais campos). Esse acesso não depende de `contact:read`. Conceda esse escopo só a integrações que podem tratar esses dados pessoais. |
 | `web_form:write` | Formulários: escrita | Criar, editar e excluir formulários. Gerar link para oportunidade exige também Oportunidades: escrita. |
 | `system_webhook:read` / `system_webhook:write` | Webhooks globais | Ver e gerenciar webhooks globais, que enviam os eventos do CRM para uma URL sua. |
 
